@@ -71,6 +71,46 @@
             font-size: 14px;
             color: #40646D; /* Blue text */
         }
+        .collapsible {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 10px;
+            border: 1px solid #4A5B29; /* Green border */
+            background-color: #4A5B29; /* Green background */
+            color: #FFFFFF; /* White text */
+            margin-top: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .collapsible::after {
+            content: '\25B6'; /* Right-pointing arrow */
+            font-size: 12px;
+            transition: transform 0.3s ease;
+            color: #FFFFFF; /* White arrow */
+        }
+        .collapsible.active::after {
+            transform: rotate(90deg); /* Downward-pointing arrow */
+        }
+        .content {
+            display: none;
+            padding: 10px;
+            border: 1px solid #4A5B29; /* Green border */
+            margin-top: 5px;
+            background-color: #F2EFE7; /* Cream background */
+            border-radius: 4px;
+        }
+        input[type="text"], textarea {
+            border: 1px solid #4A5B29; /* Green border */
+            border-radius: 4px;
+            padding: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: 2px solid #40646D; /* Blue focus outline */
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -202,6 +242,7 @@
 
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'content';
+                contentDiv.style.display = 'none'; // Ensure it's initially collapsed
                 countyList.appendChild(contentDiv);
 
                 // Add "Select All Counties" option
@@ -219,6 +260,7 @@
                 selectAllDiv.appendChild(selectAllLabel);
                 contentDiv.appendChild(selectAllDiv);
 
+                // Get and sort counties for the selected state
                 const counties = googleSheetData.filter(row => row['StateFP'] === stateFips);
                 counties.sort((a, b) => a['County'].localeCompare(b['County']));
 
@@ -242,6 +284,7 @@
                     contentDiv.appendChild(div);
                 });
 
+                // Automatically expand the first state header for better visibility
                 if (countyList.children.length > 2 && !countyList.querySelector('.active')) {
                     collapsibleHeader.classList.add('active');
                     contentDiv.style.display = 'block';
@@ -254,8 +297,8 @@
         function selectAllCounties(stateFips, selectAll) {
             const checkboxes = document.querySelectorAll(`#countyList input[id^="county-${stateFips}"]`);
             checkboxes.forEach(cb => cb.checked = selectAll);
-            updateMap();
-            generateFips();
+            updateMap(); // Update map with all selected or deselected counties
+            generateFips(); // Update FIPS codes after selecting all counties
         }
 
         function updateMap() {
@@ -279,11 +322,12 @@
             
             const fipsCodes = Array.from(document.querySelectorAll('#countyList input:checked'))
                 .map(cb => cb.value)
-                .filter(code => code && code !== 'on'); 
+                .filter(code => code && code !== 'on'); // Filter out any unwanted values like "on"
 
             fipsOutput.value = fipsCodes.join(',');
         }
 
+        // Copy FIPS codes to clipboard
         function copyFipsToClipboard() {
             const fipsOutput = document.getElementById('fipsOutput');
             fipsOutput.select();
@@ -291,6 +335,7 @@
             alert('Selections copied to clipboard!');
         }
 
+        // Download FIPS codes as a text file
         function downloadFipsCodes() {
             const fipsOutput = document.getElementById('fipsOutput').value;
             const blob = new Blob([fipsOutput], { type: 'text/plain' });
@@ -300,6 +345,7 @@
             link.click();
         }
 
+        // Clear all selections
         function clearSelections() {
             document.querySelectorAll('#stateList input[type="checkbox"], #countyList input[type="checkbox"]').forEach(cb => cb.checked = false);
             document.getElementById('fipsOutput').value = '';
@@ -327,6 +373,7 @@
             }
         }
 
+        // Load data when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             loadData();
