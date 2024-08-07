@@ -177,18 +177,30 @@
         map.on(L.Draw.Event.CREATED, function(event) {
             let layer = event.layer;
             drawnItems.addLayer(layer);
-            processDrawnShape(layer.toGeoJSON());
+            processDrawnShape();
         });
 
-        // Process the drawn shape and match it with county boundaries
-        function processDrawnShape(drawnGeoJson) {
+        // Handle the draw:edited event
+        map.on(L.Draw.Event.EDITED, function() {
+            processDrawnShape();  // Recalculate FIPS codes when shapes are edited
+        });
+
+        // Process the drawn shapes and match them with county boundaries
+        function processDrawnShape() {
             let matchedFips = [];
 
-            geoJsonData.forEach(county => {
-                // Check if the actual geometry of the drawn shape intersects with the county geometry
-                if (turf.intersect(drawnGeoJson, county.geometry)) {
-                    matchedFips.push(county.id);
-                }
+            // Clear the text area before recalculating
+            document.getElementById('fipsOutput').value = '';
+
+            drawnItems.eachLayer(function(layer) {
+                let drawnGeoJson = layer.toGeoJSON();
+
+                geoJsonData.forEach(county => {
+                    // Check if the actual geometry of the drawn shape intersects with the county geometry
+                    if (turf.intersect(drawnGeoJson, county.geometry)) {
+                        matchedFips.push(county.id);
+                    }
+                });
             });
 
             displayFipsCodes(matchedFips);
