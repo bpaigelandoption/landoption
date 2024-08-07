@@ -6,6 +6,9 @@
     <title>Landoption Programs County Drawer</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.3.0/turf.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -83,8 +86,6 @@
             font-size: 1.2em; /* Increase the size of the map drawing tools */
         }
     </style>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 </head>
 <body>
     <h3>Landoption Programs County Drawer</h3>
@@ -184,8 +185,8 @@
             let matchedFips = [];
 
             geoJsonData.forEach(county => {
-                let countyLayer = L.geoJSON(county);
-                if (countyLayer.getBounds().intersects(L.geoJSON(drawnGeoJson).getBounds())) {
+                // Check if the actual geometry of the drawn shape intersects with the county geometry
+                if (turf.intersect(drawnGeoJson, county.geometry)) {
                     matchedFips.push(county.id);
                 }
             });
