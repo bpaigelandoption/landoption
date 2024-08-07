@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landoption Programs County Calculator</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #F2EFE7; /* Cream background */
+            color: #40646D; /* Blue text */
+        }
+        h3 {
+            color: #4A5B29; /* Green heading */
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .state-county-select {
+            flex: 1;
+            min-width: 300px;
+        }
+        .list-group {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .copy-btn, .download-btn, .clear-btn {
+            padding: 10px 20px;
+            background-color: #4A5B29; /* Green background */
+            color: #FFFFFF; /* White text */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .copy-btn:hover, .download-btn:hover, .clear-btn:hover {
+            background-color: #40646D; /* Blue on hover */
+        }
+        #map-container {
+            height: 500px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            position: relative;
+            overflow: hidden;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        #fipsOutput {
+            width: 100%;
+            height: 100px;
+            margin-top: 20px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .help-text {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #40646D; /* Blue text */
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <h3>Landoption Programs County Calculator</h3>
+
+    <div class="help-text">
+        You must select all the states you operate in first. The counties will be added in alphabetical order under each state.
+    </div>
+
+    <div class="container">
+        <div class="state-county-select">
+            <label for="stateSearch">Search and Select States:</label>
+            <input type="text" id="stateSearch" placeholder="Search State..." onkeyup="filterStateList()" aria-label="Search States">
+            <div id="stateList" class="list-group" aria-labelledby="stateSearch"></div>
+        </div>
+
+        <div class="state-county-select">
+            <label for="countySearch">Search and Select Counties:</label>
+            <input type="text" id="countySearch" placeholder="Search County or State..." onkeyup="filterCountyList()" aria-label="Search Counties">
+            <div id="countyList" class="list-group" aria-labelledby="countySearch"></div>
+        </div>
+    </div>
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <button class="copy-btn" onclick="copyFipsToClipboard()">Copy Selections to Clipboard</button>
+        <button class="download-btn" onclick="downloadFipsCodes()">Download Values</button>
+        <button class="clear-btn" onclick="clearSelections()">Clear All Selections</button>
+    </div>
+
+    <textarea id="fipsOutput" readonly aria-label="Selected FIPS codes output"></textarea>
+
+    <script>
+        const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/1i4a5Kby7dNoPJGokEPKtOZvYboCeyigg/pub?output=csv';
+        const geoJsonUrl = 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json';
+
+        let googleSheetData = [];
+        let geoJsonData = [];
+
+        let map = null;
+        let geojsonLayer = null;
+        let selectedGeoJsonFeatures = [];
+
+        // Initialize the map
+        function initMap() {
+            map = L.map('map').setView([37.8, -96], 4);
+
+            // Add OpenStreetMap base layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        // Load both Google Sheets data and GeoJSON data
+        async function loadData() {
+            googleSheetData = await loadGoogleSheetData();
+            geoJsonData = await loadGeoJsonData();
+            populateStates();
+        }
+
+        function loadGoogleSheetData() {
+            return fetch(googleSheetUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const parsedData = Papa.parse(data, { header: true }).data;
+                    return parsedData;
+                })
+                .catch(error => console.error('Error fetching Google Sheet data:', error));
+        }
+
+        function loadGeoJsonData() {
+            return fetch(geoJsonUrl)
+                .then(response => response.json())
+                .then(data => data.features)
+                .catch(error => console.error('Error loading GeoJSON data:', error));
+        }
+
+        function populateStates() {
+            const stateList = document.getElementById('stateList');
+            stateList.innerHTML = '';
+
+            const states = [...new Set(googleSheetData.map(row => `${row['State']}|${row['StateFP']}`))];
+            states.sort();
+
+            states.forEach(stateData => {
+                const [stateName, stateFips] = stateData.split('|');
+
+                const div = document.createElement('div');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = stateFips;
+                checkbox.id = `state-${stateFips}`;
+                checkbox.onclick = updateCounties;
+
+                const label = document.createElement('label');
+                label.htmlFor = `state-${stateFips}`;
+                label.textContent = stateName;  // Display the state name
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                stateList.appendChild(div);
+            });
+        }
+
+        function updateCounties() {
+            const countyList = document.getElementById('countyList');
+            countyList.innerHTML = '';
+
+            const selectedStates = Array.from(document.querySelectorAll('#stateList input:checked')).map(cb => cb.value);
+
+            selectedStates.forEach(stateFips => {
+                const stateName = googleSheetData.find(row => row['StateFP'] === stateFips).State;
+
+                // Create a collapsible state header
+                const collapsibleHeader = document.createElement('div');
+                collapsibleHeader.className = 'collapsible';
+                collapsibleHeader.textContent = stateName;
+                collapsibleHeader.onclick = function () {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                };
+                countyList.appendChild(collapsibleHeader);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'content';
+                countyList.appendChild(contentDiv);
+
+                // Add "Select All Counties" option
+                const selectAllDiv = document.createElement('div');
+                const selectAllCheckbox = document.createElement('input');
+                selectAllCheckbox.type = 'checkbox';
+                selectAllCheckbox.id = `select-all-${stateFips}`;
+                selectAllCheckbox.onclick = () => selectAllCounties(stateFips, selectAllCheckbox.checked);
+
+                const selectAllLabel = document.createElement('label');
+                selectAllLabel.htmlFor = `select-all-${stateFips}`;
+                selectAllLabel.textContent = `Select All Counties`;
+
+                selectAllDiv.appendChild(selectAllCheckbox);
+                selectAllDiv.appendChild(selectAllLabel);
+                contentDiv.appendChild(selectAllDiv);
+
+                const counties = googleSheetData.filter(row => row['StateFP'] === stateFips);
+                counties.sort((a, b) => a['County'].localeCompare(b['County']));
+
+                counties.forEach(county => {
+                    const div = document.createElement('div');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = county['Comb_FP'];
+                    checkbox.id = `county-${county['StateFP']}-${county['CountyFP']}`;
+                    checkbox.onclick = () => {
+                        updateMap();
+                        generateFips();
+                    };
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `county-${county['StateFP']}-${county['CountyFP']}`;
+                    label.textContent = county['County'];
+
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                    contentDiv.appendChild(div);
+                });
+
+                if (countyList.children.length > 2 && !countyList.querySelector('.active')) {
+                    collapsibleHeader.classList.add('active');
+                    contentDiv.style.display = 'block';
+                }
+            });
+
+            generateFips(); // Update FIPS codes after updating counties
+        }
+
+        function selectAllCounties(stateFips, selectAll) {
+            const checkboxes = document.querySelectorAll(`#countyList input[id^="county-${stateFips}"]`);
+            checkboxes.forEach(cb => cb.checked = selectAll);
+            updateMap();
+            generateFips();
+        }
+
+        function updateMap() {
+            if (geojsonLayer) {
+                geojsonLayer.remove();
+            }
+
+            const selectedFipsCodes = Array.from(document.querySelectorAll('#countyList input:checked')).map(cb => cb.value);
+
+            selectedGeoJsonFeatures = geoJsonData.filter(feature => selectedFipsCodes.includes(feature.id));
+
+            geojsonLayer = L.geoJSON({ type: 'FeatureCollection', features: selectedGeoJsonFeatures }).addTo(map);
+
+            if (selectedGeoJsonFeatures.length > 0) {
+                map.fitBounds(geojsonLayer.getBounds());
+            }
+        }
+
+        function generateFips() {
+            const fipsOutput = document.getElementById('fipsOutput');
+            
+            const fipsCodes = Array.from(document.querySelectorAll('#countyList input:checked'))
+                .map(cb => cb.value)
+                .filter(code => code && code !== 'on'); 
+
+            fipsOutput.value = fipsCodes.join(',');
+        }
+
+        function copyFipsToClipboard() {
+            const fipsOutput = document.getElementById('fipsOutput');
+            fipsOutput.select();
+            document.execCommand('copy');
+            alert('Selections copied to clipboard!');
+        }
+
+        function downloadFipsCodes() {
+            const fipsOutput = document.getElementById('fipsOutput').value;
+            const blob = new Blob([fipsOutput], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'fips_codes.txt';
+            link.click();
+        }
+
+        function clearSelections() {
+            document.querySelectorAll('#stateList input[type="checkbox"], #countyList input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('fipsOutput').value = '';
+            if (geojsonLayer) {
+                geojsonLayer.remove();
+            }
+            selectedGeoJsonFeatures = [];
+        }
+
+        function filterStateList() {
+            const search = document.getElementById('stateSearch').value.toLowerCase();
+            const stateList = document.getElementById('stateList').children;
+            for (let i = 0; i < stateList.length; i++) {
+                const label = stateList[i].querySelector('label').textContent.toLowerCase();
+                stateList[i].style.display = label.includes(search) ? '' : 'none';
+            }
+        }
+
+        function filterCountyList() {
+            const search = document.getElementById('countySearch').value.toLowerCase();
+            const countyList = document.getElementById('countyList').children;
+            for (let i = 0; i < countyList.length; i++) {
+                const label = countyList[i].querySelector('label') ? countyList[i].querySelector('label').textContent.toLowerCase() : '';
+                countyList[i].style.display = label.includes(search) ? '' : 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            loadData();
+        });
+    </script>
+</body>
+</html>
