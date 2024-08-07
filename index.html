@@ -8,47 +8,49 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #F2EFE7; /* Cream background */
-            color: #40646D; /* Blue text */
+            padding: 10px;
+            background-color: #F2EFE7;
+            color: #40646D;
         }
         h3 {
-            color: #4A5B29; /* Green heading */
+            color: #4A5B29;
+            text-align: center;
         }
         .container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            gap: 10px;
+            justify-content: space-between;
         }
         .state-county-select {
-            flex: 1;
-            min-width: 300px;
+            width: 290px; /* Fixed width to fit two columns side by side */
+            box-sizing: border-box;
         }
         .list-group {
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
             border: 1px solid #ddd;
             padding: 10px;
             background-color: #f9f9f9;
         }
         .copy-btn, .download-btn, .clear-btn {
-            padding: 10px 20px;
-            background-color: #4A5B29; /* Green background */
-            color: #FFFFFF; /* White text */
+            padding: 8px 16px;
+            background-color: #4A5B29;
+            color: #FFFFFF;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
+            font-size: 14px;
+            margin-right: 5px;
+            margin-top: 10px;
         }
         .copy-btn:hover, .download-btn:hover, .clear-btn:hover {
-            background-color: #40646D; /* Blue on hover */
+            background-color: #40646D;
         }
         #map-container {
-            height: 500px;
-            margin-top: 20px;
+            height: 300px;
+            margin-top: 10px;
             border: 1px solid #ddd;
             position: relative;
             overflow: hidden;
@@ -59,57 +61,53 @@
         }
         #fipsOutput {
             width: 100%;
-            height: 100px;
-            margin-top: 20px;
-            font-size: 16px;
-            padding: 10px;
+            height: 80px;
+            margin-top: 10px;
+            font-size: 14px;
+            padding: 8px;
             border: 1px solid #ddd;
             background-color: #f9f9f9;
-        }
-        .help-text {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #40646D; /* Blue text */
         }
         .collapsible {
             cursor: pointer;
             font-weight: bold;
-            padding: 10px;
-            border: 1px solid #4A5B29; /* Green border */
-            background-color: #4A5B29; /* Green background */
-            color: #FFFFFF; /* White text */
-            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid #4A5B29;
+            background-color: #4A5B29;
+            color: #FFFFFF;
+            margin-top: 5px;
             border-radius: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .collapsible::after {
-            content: '\25B6'; /* Right-pointing arrow */
+            content: '\25B6';
             font-size: 12px;
             transition: transform 0.3s ease;
-            color: #FFFFFF; /* White arrow */
+            color: #FFFFFF;
         }
         .collapsible.active::after {
-            transform: rotate(90deg); /* Downward-pointing arrow */
+            transform: rotate(90deg);
         }
         .content {
             display: none;
-            padding: 10px;
-            border: 1px solid #4A5B29; /* Green border */
+            padding: 8px;
+            border: 1px solid #4A5B29;
             margin-top: 5px;
-            background-color: #F2EFE7; /* Cream background */
+            background-color: #F2EFE7;
             border-radius: 4px;
         }
         input[type="text"], textarea {
-            border: 1px solid #4A5B29; /* Green border */
+            border: 1px solid #4A5B29;
             border-radius: 4px;
-            padding: 5px;
+            padding: 4px;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
         }
         input[type="text"]:focus, textarea:focus {
-            outline: 2px solid #40646D; /* Blue focus outline */
+            outline: 2px solid #40646D;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -140,7 +138,7 @@
         <div id="map"></div>
     </div>
 
-    <div style="margin-top: 20px;">
+    <div style="margin-top: 10px;">
         <button class="copy-btn" onclick="copyFipsToClipboard()">Copy Selections to Clipboard</button>
         <button class="download-btn" onclick="downloadFipsCodes()">Download Values</button>
         <button class="clear-btn" onclick="clearSelections()">Clear All Selections</button>
