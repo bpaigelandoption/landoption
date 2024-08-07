@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landoption Programs County Drawer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #F2EFE7;
+            color: #40646D;
+        }
+        h3 {
+            color: #4A5B29;
+            text-align: center;
+        }
+        .help-text-container {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .help-text-container div {
+            flex: 1;
+            margin: 0 5px;
+        }
+        #map-container {
+            height: 500px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .output-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .copy-btn, .download-btn, .clear-btn {
+            padding: 10px 20px;
+            background-color: #4A5B29;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .copy-btn:hover, .download-btn:hover, .clear-btn:hover {
+            background-color: #40646D;
+        }
+        .leaflet-draw-toolbar {
+            font-size: 1.2em; /* Increase the size of the map drawing tools */
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+</head>
+<body>
+    <h3>Landoption Programs County Drawer</h3>
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <!-- Horizontally aligned help text below the map -->
+    <div class="help-text-container">
+        <div>Zoom in and out</div>
+        <div>Click and drag to pan</div>
+        <div>Draw a polygon</div>
+        <div>Draw a rectangle</div>
+        <div>Edit your drawings</div>
+        <div>Delete your drawings</div>
+    </div>
+    <div style="text-align: center; font-size: 12px; margin-top: 5px;">
+        <em>*You can draw multiple shapes. Remember to click "Reset / Clear Data" before starting over.</em>
+    </div>
+
+    <div class="output-container">
+        <label for="fipsOutput">Matched FIPS Codes:</label>
+        <textarea id="fipsOutput" readonly></textarea>
+    </div>
+
+    <div class="btn-container">
+        <button class="copy-btn" onclick="copyFipsToClipboard()">Copy Selections to Clipboard</button>
+        <button class="download-btn" onclick="downloadFipsCodes()">Download Values</button>
+        <button class="clear-btn" onclick="clearSelections()">Reset / Clear Data</button>
+    </div>
+
+    <script>
+        const geoJsonUrl = 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json';
+
+        let map = L.map('map').setView([37.8, -96], 4);
+        let drawnItems = new L.FeatureGroup();
+        let geoJsonData = [];
+
+        // Load GeoJSON data
+        fetch(geoJsonUrl)
+            .then(response => response.json())
+            .then(data => {
+                geoJsonData = data.features; // Extract features from the GeoJSON
+            });
+
+        // Initialize the map with ESRI World Imagery and Boundaries overlay
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS, NOAA',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add boundaries and place names on top of the satellite imagery
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Boundaries & Labels &copy; Esri',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Initialize the drawing tool
+        map.addLayer(drawnItems);
+        let drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                polyline: false,
+                circle: false,
+                marker: false,
+                circlemarker: false,
+                polygon: {
+                    shapeOptions: {
+                        color: '#40646D', // Blue color for drawn shapes
+                        fillColor: '#40646D',
+                        fillOpacity: 0.5 // Transparency to stand out against satellite imagery
+                    }
+                },
+                rectangle: {
+                    shapeOptions: {
+                        color: '#40646D', // Blue color for drawn shapes
+                        fillColor: '#40646D',
+                        fillOpacity: 0.5 // Transparency to stand out against satellite imagery
+                    }
+                }
+            }
+        });
+        map.addControl(drawControl);
+
+        // Handle the draw:created event
+        map.on(L.Draw.Event.CREATED, function(event) {
+            let layer = event.layer;
+            drawnItems.addLayer(layer);
+            processDrawnShape(layer.toGeoJSON());
+        });
+
+        // Process the drawn shape and match it with county boundaries
+        function processDrawnShape(drawnGeoJson) {
+            let matchedFips = [];
+
+            geoJsonData.forEach(county => {
+                let countyLayer = L.geoJSON(county);
+                if (countyLayer.getBounds().intersects(L.geoJSON(drawnGeoJson).getBounds())) {
+                    matchedFips.push(county.id);
+                }
+            });
+
+            displayFipsCodes(matchedFips);
+        }
+
+        // Display the FIPS codes in the text area
+        function displayFipsCodes(fipsCodes) {
+            document.getElementById('fipsOutput').value = fipsCodes.join(',');
+        }
+
+        // Copy FIPS codes to clipboard
+        function copyFipsToClipboard() {
+            let fipsOutput = document.getElementById('fipsOutput');
+            fipsOutput.select();
+            document.execCommand('copy');
+            alert('FIPS Codes copied to clipboard!');
+        }
+
+        // Download FIPS codes as a text file
+        function downloadFipsCodes() {
+            const fipsOutput = document.getElementById('fipsOutput').value;
+            const blob = new Blob([fipsOutput], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'fips_codes.txt';
+            link.click();
+        }
+
+        // Clear all selections
+        function clearSelections() {
+            drawnItems.clearLayers();
+            document.getElementById('fipsOutput').value = '';
+        }
+    </script>
+</body>
+</html>
