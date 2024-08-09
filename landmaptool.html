@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landoption Programs County Drawer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.3.0/turf.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATgO6YhVaVUs6ap0qFbaA_HPm9mgrZ-EQ&libraries=places"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #F2EFE7;
+            color: #40646D;
+        }
+        h3 {
+            color: #4A5B29;
+            text-align: center;
+        }
+        .search-bar-container {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .help-text-container {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .help-text-container div {
+            flex: 1;
+            margin: 0 5px;
+        }
+        #map-container {
+            height: 500px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .output-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 60px;
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .web-map-link {
+            word-break: break-all;
+            font-size: 16px;
+            color: #0645AD;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .copy-btn, .download-btn, .clear-btn {
+            padding: 10px 20px;
+            background-color: #4A5B29;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .copy-btn:hover, .download-btn:hover, .clear-btn:hover {
+            background-color: #40646D;
+        }
+        .leaflet-draw-toolbar {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h3>Landoption Programs County Drawer</h3>
+
+    <div class="search-bar-container">
+        <input id="search-bar" class="search-bar" type="text" placeholder="Search for an address, town, or property...">
+    </div>
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div class="help-text-container">
+        <div>Zoom in and out</div>
+        <div>Click and drag to pan</div>
+        <div>Draw a polygon</div>
+        <div>Draw a rectangle</div>
+        <div>Edit your drawings</div>
+        <div>Delete your drawings</div>
+    </div>
+    <div style="text-align: center; font-size: 12px; margin-top: 5px;">
+        <em>*You can draw multiple shapes. Remember to click "Reset / Clear Data" before starting over.</em>
+    </div>
+
+    <div class="output-container">
+        <label for="addressOutput">Nearest Address:</label>
+        <textarea id="addressOutput" readonly></textarea>
+
+        <label for="centerOutput">Center Point (Lat, Long):</label>
+        <textarea id="centerOutput" readonly></textarea>
+
+        <label for="webMapLink">ArcGIS Web Map Link:</label>
+        <div id="webMapLink" class="web-map-link"></div>
+    </div>
+
+    <div class="btn-container">
+        <button class="clear-btn" onclick="clearSelections()">Reset / Clear Data</button>
+    </div>
+
+    <script>
+        let map = L.map('map').setView([37.8, -96], 4);
+        let drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        // Initialize the map with ESRI World Imagery and Boundaries overlay
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS, NOAA',
+            maxZoom: 19
+        }).addTo(map);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Boundaries & Labels &copy; Esri',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add the search bar functionality
+        const searchBar = document.getElementById('search-bar');
+        const geocoder = new google.maps.Geocoder();
+
+        searchBar.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const query = searchBar.value;
+                geocoder.geocode({ address: query }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        map.setView([results[0].geometry.location.lat(), results[0].geometry.location.lng()], 15);
+                    } else {
+                        alert('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+            }
+        });
+
+        let drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                polyline: false,
+                circle: false,
+                marker: false,
+                circlemarker: false,
+                polygon: {
+                    shapeOptions: {
+                        color: '#40646D', 
+                        fillColor: '#40646D',
+                        fillOpacity: 0.5 
+                    }
+                },
+                rectangle: {
+                    shapeOptions: {
+                        color: '#40646D', 
+                        fillColor: '#40646D',
+                        fillOpacity: 0.5 
+                    }
+                }
+            }
+        });
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function(event) {
+            let layer = event.layer;
+            drawnItems.addLayer(layer);
+            processDrawnShape(layer);
+        });
+
+        map.on(L.Draw.Event.EDITED, function() {
+            drawnItems.eachLayer(layer => processDrawnShape(layer));
+        });
+
+        function processDrawnShape(layer) {
+            let drawnGeoJson = layer.toGeoJSON();
+
+            // Calculate the center point
+            let center = turf.centroid(drawnGeoJson).geometry.coordinates;
+
+            // Get the nearest address using Google Maps Geocoding API
+            getNearestAddress(center);
+
+            // Display the center point
+            displayCenterPoint(center);
+
+            // Create and display the ArcGIS Web Map link
+            createWebMapLink(drawnGeoJson);
+        }
+
+        function getNearestAddress(center) {
+            let latLng = { lat: center[1], lng: center[0] };
+            let radius = 500; // Start with a 500 meter search radius
+            const maxRadius = 5000; // Maximum radius to search for an address
+            const increment = 500; // Increment radius by 500 meters on each attempt
+
+            function tryGeocode() {
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === 'OK' && results.length > 0) {
+                        let bestResult = null;
+                        for (let result of results) {
+                            if (result.types.includes("street_address") || result.types.includes("premise")) {
+                                bestResult = result;
+                                break;
+                            }
+                        }
+                        if (bestResult) {
+                            const formattedAddress = formatAddress(bestResult);
+                            document.getElementById('addressOutput').value = formattedAddress;
+                        } else if (radius < maxRadius) {
+                            // Expand the search radius and try again
+                            radius += increment;
+                            latLng = moveLatLng(latLng, radius);
+                            tryGeocode();
+                        } else {
+                            // If no suitable address is found, use the most detailed available result
+                            bestResult = results[0];
+                            const formattedAddress = formatAddress(bestResult);
+                            document.getElementById('addressOutput').value = formattedAddress;
+                        }
+                    } else {
+                        document.getElementById('addressOutput').value = 'No suitable address found';
+                    }
+                });
+            }
+
+            tryGeocode();
+        }
+
+        function moveLatLng(latLng, distance) {
+            // Move the point slightly in both directions to expand the search area
+            const earthRadius = 6371000; // meters
+            const deltaLat = distance / earthRadius;
+            const deltaLng = distance / (earthRadius * Math.cos(Math.PI * latLng.lat / 180));
+            return {
+                lat: latLng.lat + deltaLat * (Math.random() > 0.5 ? 1 : -1),
+                lng: latLng.lng + deltaLng * (Math.random() > 0.5 ? 1 : -1)
+            };
+        }
+
+        function formatAddress(result) {
+            let addressComponents = result.address_components;
+            let streetNumber = '';
+            let route = '';
+            let locality = '';
+            let administrativeAreaLevel1 = '';
+            let postalCode = '';
+            let country = '';
+
+            addressComponents.forEach(component => {
+                if (component.types.includes('street_number')) {
+                    streetNumber = component.long_name;
+                }
+                if (component.types.includes('route')) {
+                    route = component.long_name;
+                }
+                if (component.types.includes('locality')) {
+                    locality = component.long_name;
+                }
+                if (component.types.includes('administrative_area_level_1')) {
+                    administrativeAreaLevel1 = component.short_name;
+                }
+                if (component.types.includes('postal_code')) {
+                    postalCode = component.long_name;
+                }
+                if (component.types.includes('country')) {
+                    country = component.long_name;
+                }
+            });
+
+            let formattedAddress = `${streetNumber} ${route}, ${locality}, ${administrativeAreaLevel1} ${postalCode}, ${country}`.trim();
+
+            if (!formattedAddress.trim()) {
+                formattedAddress = `${locality}, ${administrativeAreaLevel1} ${postalCode}, ${country}`.trim();
+            }
+
+            return formattedAddress;
+        }
+
+        function displayCenterPoint(center) {
+            document.getElementById('centerOutput').value = `${center[1].toFixed(6)}, ${center[0].toFixed(6)}`;
+        }
+
+        function createWebMapLink(geoJson) {
+            const rings = geoJson.geometry.coordinates[0];
+            const esriGeometry = {
+                geometryType: "esriGeometryPolygon",
+                spatialReference: { wkid: 4326 },
+                rings: rings
+            };
+            const encodedGeometry = encodeURIComponent(JSON.stringify(esriGeometry));
+            const arcgisLink = `https://www.arcgis.com/home/webmap/viewer.html?useExisting=1&layers=%5B%7B%22geometryType%22%3A%22esriGeometryPolygon%22%2C%22spatialReference%22%3A%7B%22wkid%22%3A4326%7D%2C%22rings%22%3A%5B%5B%5B${encodedGeometry}%5D%5D%7D%5D`;
+            document.getElementById('webMapLink').innerHTML = `<a href="${arcgisLink}" target="_blank">${arcgisLink}</a>`;
+        }
+
+        // Clear all selections
+        function clearSelections() {
+            drawnItems.clearLayers();
+            document.getElementById('addressOutput').value = '';
+            document.getElementById('centerOutput').value = '';
+            document.getElementById('webMapLink').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
