@@ -12,24 +12,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
 
     <style>
-        /* Retained your original CSS */
+        /* Flexbox layout for better container control */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Ensure the content takes the full height of the iframe */
+        }
+
         .map-root {
-            height: 500px;
+            flex-grow: 1;  /* Map takes up available space */
             width: 100%;
-            margin-top: 20px;
+            margin: 0;
             border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
-            position: relative;
-            z-index: 1;
         }
 
         .output-container {
-            margin-top: 10px;
             padding: 10px;
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 5px;
+            text-align: center;
         }
 
         .custom-button {
@@ -53,7 +57,7 @@
 </head>
 <body>
 
-    <div class="slds-m-around_medium">
+    <div class="container">
         <!-- Map container -->
         <div class="map-root" id="map-root"></div>
 
@@ -73,7 +77,6 @@
     <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
 
     <script>
-        // Initialize map variables
         let mapInitialized = false;
         let map, drawnItems, geoJsonData = null;
 
@@ -141,6 +144,11 @@
                     document.getElementById('area-output').innerText = '0';
                     geoJsonData = null;
                 });
+
+                // Fix map resize issue in iFrames
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 500);
             }
         });
 
@@ -153,6 +161,8 @@
                 }).catch(err => {
                     console.error('Error copying GeoJSON:', err);
                 });
+            } else {
+                console.error('No GeoJSON data available to copy.');
             }
         }
     </script>
