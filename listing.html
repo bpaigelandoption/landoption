@@ -3,13 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landoption Listings Program Shape</title>
+    <title>Landoption Programs County Drawer</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <style>
-        /* ... (existing styles) ... */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #F2EFE7;
+            color: #40646D;
+        }
+        h3 {
+            color: #4A5B29;
+            text-align: center;
+        }
+        .help-text-container {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .help-text-container div {
+            flex: 1;
+            margin: 0 5px;
+        }
+        #map-container {
+            height: 500px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .output-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .copy-btn, .download-btn, .clear-btn {
+            padding: 10px 20px;
+            background-color: #4A5B29;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .copy-btn:hover, .download-btn:hover, .clear-btn:hover {
+            background-color: #40646D;
+        }
+        .leaflet-draw-toolbar {
+            font-size: 1.2em; /* Increase the size of the map drawing tools */
+        }
     </style>
 </head>
 <body>
@@ -19,7 +93,18 @@
         <div id="map"></div>
     </div>
 
-    <!-- Help text container (unchanged) -->
+    <!-- Horizontally aligned help text below the map -->
+    <div class="help-text-container">
+        <div>Zoom in and out</div>
+        <div>Click and drag to pan</div>
+        <div>Draw a polygon</div>
+        <div>Draw a rectangle</div>
+        <div>Edit your drawings</div>
+        <div>Delete your drawings</div>
+    </div>
+    <div style="text-align: center; font-size: 12px; margin-top: 5px;">
+        <em>*You can draw multiple shapes. Remember to click "Reset / Clear Data" before starting over.</em>
+    </div>
 
     <div class="output-container">
         <label for="geoJsonOutput">GeoJSON Output:</label>
