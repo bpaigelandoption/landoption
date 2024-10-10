@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.3.0/turf.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -93,7 +94,6 @@
         <div id="map"></div>
     </div>
 
-    <!-- Horizontally aligned help text below the map -->
     <div class="help-text-container">
         <div>Zoom in and out</div>
         <div>Click and drag to pan</div>
@@ -118,8 +118,18 @@
     </div>
 
     <script>
+        const geoJsonUrl = 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json';
+
         let map = L.map('map').setView([37.8, -96], 4);
         let drawnItems = new L.FeatureGroup();
+        let geoJsonData = [];
+
+        // Load GeoJSON data
+        fetch(geoJsonUrl)
+            .then(response => response.json())
+            .then(data => {
+                geoJsonData = data.features; // Extract features from the GeoJSON
+            });
 
         // Initialize the map with ESRI World Imagery and Boundaries overlay
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -214,8 +224,4 @@
         // Clear all selections
         function clearSelections() {
             drawnItems.clearLayers();
-            document.getElementById('geoJsonOutput').value = '';
-        }
-    </script>
-</body>
-</html>
+            document.get
