@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landoption Listings Program Shape</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <style>
+        /* ... (existing styles) ... */
+    </style>
+</head>
+<body>
+    <h3>Landoption Programs County Drawer</h3>
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <!-- Help text container (unchanged) -->
+
+    <div class="output-container">
+        <label for="geoJsonOutput">GeoJSON Output:</label>
+        <textarea id="geoJsonOutput" readonly></textarea>
+    </div>
+
+    <div class="btn-container">
+        <button class="copy-btn" onclick="copyGeoJsonToClipboard()">Copy GeoJSON to Clipboard</button>
+        <button class="download-btn" onclick="downloadGeoJson()">Download GeoJSON</button>
+        <button class="clear-btn" onclick="clearSelections()">Reset / Clear Data</button>
+    </div>
+
+    <script>
+        let map = L.map('map').setView([37.8, -96], 4);
+        let drawnItems = new L.FeatureGroup();
+
+        // Initialize the map with ESRI World Imagery and Boundaries overlay
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS, NOAA',
+            maxZoom: 19
+        }).addTo(map);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Boundaries & Labels &copy; Esri',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Initialize the drawing tool
+        map.addLayer(drawnItems);
+        let drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                polyline: false,
+                circle: false,
+                marker: false,
+                circlemarker: false,
+                polygon: {
+                    shapeOptions: {
+                        color: '#40646D',
+                        fillColor: '#40646D',
+                        fillOpacity: 0.5
+                    }
+                },
+                rectangle: {
+                    shapeOptions: {
+                        color: '#40646D',
+                        fillColor: '#40646D',
+                        fillOpacity: 0.5
+                    }
+                }
+            }
+        });
+        map.addControl(drawControl);
+
+        // Handle the draw:created event
+        map.on(L.Draw.Event.CREATED, function(event) {
+            let layer = event.layer;
+            drawnItems.addLayer(layer);
+            processDrawnShape();
+        });
+
+        // Handle the draw:edited event
+        map.on(L.Draw.Event.EDITED, function() {
+            processDrawnShape();  // Recalculate GeoJSON when shapes are edited
+        });
+
+        // Process the drawn shapes and output GeoJSON
+        function processDrawnShape() {
+            let geoJsonOutput = [];
+
+            // Clear the text area before recalculating
+            document.getElementById('geoJsonOutput').value = '';
+
+            drawnItems.eachLayer(function(layer) {
+                let drawnGeoJson = layer.toGeoJSON();
+                geoJsonOutput.push(JSON.stringify(drawnGeoJson));  // Convert GeoJSON object to string
+            });
+
+            displayGeoJson(geoJsonOutput);
+        }
+
+        // Display the GeoJSON in the text area
+        function displayGeoJson(geoJsonStrings) {
+            document.getElementById('geoJsonOutput').value = geoJsonStrings.join('\n');
+        }
+
+        // Copy GeoJSON to clipboard
+        function copyGeoJsonToClipboard() {
+            let geoJsonOutput = document.getElementById('geoJsonOutput');
+            geoJsonOutput.select();
+            document.execCommand('copy');
+            alert('GeoJSON copied to clipboard!');
+        }
+
+        // Download GeoJSON as a text file
+        function downloadGeoJson() {
+            const geoJsonOutput = document.getElementById('geoJsonOutput').value;
+            const blob = new Blob([geoJsonOutput], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'drawn_shapes.geojson';
+            link.click();
+        }
+
+        // Clear all selections
+        function clearSelections() {
+            drawnItems.clearLayers();
+            document.getElementById('geoJsonOutput').value = '';
+        }
+    </script>
+</body>
+</html>
