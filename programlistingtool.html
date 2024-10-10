@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landoption Mapping - Hybrid Map with Boundaries</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+    <style>
+        /* Retained your original CSS */
+        .map-root {
+            height: 500px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .output-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .custom-button {
+            background-color: #4e6b70;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .custom-button:hover {
+            background-color: #3d565a;
+        }
+
+        .custom-button:active {
+            background-color: #31484d;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slds-m-around_medium">
+        <!-- Map container -->
+        <div class="map-root" id="map-root"></div>
+
+        <!-- Output container for Area -->
+        <div class="output-container">
+            <div>
+                <strong>Area: <span id="area-output">0</span> acres</strong>
+            </div>
+            <!-- Copy GeoJSON button -->
+            <button class="custom-button" onclick="copyGeoJson()">Copy GeoJSON</button>
+        </div>
+    </div>
+
+    <!-- Leaflet and Leaflet Draw JS -->
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+
+    <script>
+        // Initialize map variables
+        let mapInitialized = false;
+        let map, drawnItems, geoJsonData = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const mapRoot = document.getElementById('map-root');
+            if (!mapInitialized && mapRoot) {
+                mapInitialized = true;
+
+                // Initialize the map and set its default view
+                map = L.map(mapRoot).setView([37.8, -96], 4);
+                drawnItems = new L.FeatureGroup();
+                map.addLayer(drawnItems);
+
+                // Hybrid map: Satellite imagery with street labels
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Imagery © Esri, USGS, NOAA',
+                    maxZoom: 19
+                }).addTo(map);
+
+                L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Streets © Esri',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Add geo-political boundaries (like state borders and country boundaries)
+                L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Boundaries & Places © Esri',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Draw control with polygon drawing functionality
+                const drawControl = new L.Control.Draw({
+                    edit: {
+                        featureGroup: drawnItems,
+                        remove: true
+                    },
+                    draw: {
+                        polygon: {
+                            allowIntersection: false,
+                            showArea: true,
+                            shapeOptions: { color: '#40646D' }
+                        },
+                        polyline: false,
+                        rectangle: false,
+                        circle: false,
+                        marker: false,
+                        circlemarker: false
+                    }
+                });
+                map.addControl(drawControl);
+
+                // Handle polygon creation
+                map.on(L.Draw.Event.CREATED, function(event) {
+                    const layer = event.layer;
+                    drawnItems.addLayer(layer);
+                    geoJsonData = layer.toGeoJSON();
+
+                    const polygon = turf.polygon(geoJsonData.geometry.coordinates);
+                    const areaInSquareMeters = turf.area(polygon);
+                    document.getElementById('area-output').innerText = (areaInSquareMeters / 4046.86).toFixed(2); // Convert to acres
+                });
+
+                // Handle polygon deletion
+                map.on(L.Draw.Event.DELETED, function() {
+                    document.getElementById('area-output').innerText = '0';
+                    geoJsonData = null;
+                });
+            }
+        });
+
+        // Function to copy GeoJSON data to the clipboard
+        function copyGeoJson() {
+            if (geoJsonData) {
+                const geoJsonString = JSON.stringify(geoJsonData);
+                navigator.clipboard.writeText(geoJsonString).then(() => {
+                    console.log('GeoJSON copied:', geoJsonString);
+                }).catch(err => {
+                    console.error('Error copying GeoJSON:', err);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
