@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hunting Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fb;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h3 {
+            color: #3b3d51;
+            text-align: center;
+        }
+        #plannerForm, #results, #copyButtonContainer {
+            background-color: #ffffff;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #plannerForm label {
+            font-weight: bold;
+            color: #3b3d51;
+        }
+        #plannerForm input, #plannerForm button {
+            font-size: 1em;
+            padding: 10px;
+            margin-top: 4px;
+            border-radius: 5px;
+            border: 1px solid #cbd5e0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #plannerForm button {
+            background-color: #3b3d51;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .help-text {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        #map {
+            height: 300px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        #copyButton {
+            padding: 12px;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Hunting Planner</h3>
+
+<div id="plannerForm">
+    <label for="huntDate">Hunting Date:</label>
+    <input type="date" id="huntDate">
+    <div class="help-text">Select the date for your hunting trip.</div>
+
+    <label for="driveTime">Drive Time (minutes):</label>
+    <input type="number" id="driveTime" min="0" value="60">
+    <div class="help-text">Total drive time, including buffer time for delays.</div>
+
+    <label for="parkToSetTime">Time from Parked to Set (minutes):</label>
+    <input type="number" id="parkToSetTime" min="0" value="10">
+    <div class="help-text">Time from parked to arrival at hunting location without setup.</div>
+
+    <label for="setToEstablishTime">Time to Establish (minutes):</label>
+    <input type="number" id="setToEstablishTime" min="0" value="20">
+    <div class="help-text">Time to set up your blind, decoys, or stand for hunting.</div>
+
+    <label for="bufferTime">Buffer Before Legal Shooting (minutes):</label>
+    <input type="number" id="bufferTime" min="0" value="15">
+    <div class="help-text">Buffer time before legal shooting to ensure compliance.</div>
+
+    <label for="latLngInput">Hunting Location (Latitude, Longitude):</label>
+    <input type="text" id="latLngInput" placeholder="e.g., 40.30695, -96.471">
+    <div class="help-text">Enter coordinates to set your hunt location, or click on the map.</div>
+
+    <button id="calculateButton">Calculate Timeline</button>
+</div>
+
+<div id="map"></div>
+
+<div id="results"></div>
+
+<div id="copyButtonContainer">
+    <button id="copyButton">Copy Plan to Send to Friend</button>
+</div>
+
+<script>
+    let map = L.map('map').setView([40.700364, -99.084254], 10);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS, NOAA',
+        maxZoom: 19
+    }).addTo(map);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Boundaries & Labels &copy; Esri',
+        maxZoom: 19
+    }).addTo(map);
+//copy sunrise data here//
+    const sunriseChart = {
+    "2024-09-01": "07:04", "2024-09-02": "07:05", "2024-09-03": "07:06", "2024-09-04": "07:07", 
+    "2024-09-05": "07:08", "2024-09-06": "07:09", "2024-09-07": "07:10", "2024-09-08": "07:11", 
+    "2024-09-09": "07:12", "2024-09-10": "07:13", "2024-09-11": "07:14", "2024-09-12": "07:15", 
+    "2024-09-13": "07:16", "2024-09-14": "07:17", "2024-09-15": "07:18", "2024-09-16": "07:19", 
+    "2024-09-17": "07:20", "2024-09-18": "07:21", "2024-09-19": "07:21", "2024-09-20": "07:22", 
+    "2024-09-21": "07:23", "2024-09-22": "07:24", "2024-09-23": "07:25", "2024-09-24": "07:26", 
+    "2024-09-25": "07:27", "2024-09-26": "07:28", "2024-09-27": "07:29", "2024-09-28": "07:30", 
+    "2024-09-29": "07:31", "2024-09-30": "07:32", "2024-10-01": "07:33", "2024-10-02": "07:34", 
+    "2024-10-03": "07:36", "2024-10-04": "07:37", "2024-10-05": "07:38", "2024-10-06": "07:39", 
+    "2024-10-07": "07:40", "2024-10-08": "07:41", "2024-10-09": "07:42", "2024-10-10": "07:43", 
+    "2024-10-11": "07:44", "2024-10-12": "07:45", "2024-10-13": "07:46", "2024-10-14": "07:47", 
+    "2024-10-15": "07:48", "2024-10-16": "07:49", "2024-10-17": "07:50", "2024-10-18": "07:51", 
+    "2024-10-19": "07:53", "2024-10-20": "07:54", "2024-10-21": "07:55", "2024-10-22": "07:56", 
+    "2024-10-23": "07:57", "2024-10-24": "07:58", "2024-10-25": "07:59", "2024-10-26": "08:00", 
+    "2024-10-27": "08:02", "2024-10-28": "08:03", "2024-10-29": "08:04", "2024-10-30": "08:05", 
+    "2024-10-31": "08:06", "2024-11-01": "08:07", "2024-11-02": "08:09", "2024-11-03": "08:10", 
+    "2024-11-04": "08:11", "2024-11-05": "07:12", "2024-11-06": "07:13", "2024-11-07": "07:14", 
+    "2024-11-08": "07:16", "2024-11-09": "07:17", "2024-11-10": "07:18", "2024-11-11": "07:19", 
+    "2024-11-12": "07:20", "2024-11-13": "07:21", "2024-11-14": "07:23", "2024-11-15": "07:24", 
+    "2024-11-16": "07:25", "2024-11-17": "07:26", "2024-11-18": "07:27", "2024-11-19": "07:28", 
+    "2024-11-20": "07:30", "2024-11-21": "07:31", "2024-11-22": "07:32", "2024-11-23": "07:33", 
+    "2024-11-24": "07:34", "2024-11-25": "07:35", "2024-11-26": "07:36", "2024-11-27": "07:37", 
+    "2024-11-28": "07:38", "2024-11-29": "07:39", "2024-11-30": "07:41", "2024-12-01": "07:42", 
+    "2024-12-02": "07:43", "2024-12-03": "07:44", "2024-12-04": "07:45", "2024-12-05": "07:45", 
+    "2024-12-06": "07:46", "2024-12-07": "07:47", "2024-12-08": "07:48", "2024-12-09": "07:49", 
+    "2024-12-10": "07:50", "2024-12-11": "07:51", "2024-12-12": "07:51", "2024-12-13": "07:52", 
+    "2024-12-14": "07:53", "2024-12-15": "07:54", "2024-12-16": "07:54", "2024-12-17": "07:55", 
+    "2024-12-18": "07:55", "2024-12-19": "07:56", "2024-12-20": "07:57", "2024-12-21": "07:57", 
+    "2024-12-22": "07:58", "2024-12-23": "07:58", "2024-12-24": "07:58", "2024-12-25": "07:59", 
+    "2024-12-26": "07:59", "2024-12-27": "07:59", "2024-12-28": "08:00", "2024-12-29": "08:00", 
+    "2024-12-30": "08:00", "2024-12-31": "08:00", "2025-01-01": "08:00", "2025-01-02": "08:00", 
+    "2025-01-03": "08:00", "2025-01-04": "08:00", "2025-01-05": "08:00", "2025-01-06": "08:00", 
+    "2025-01-07": "08:00", "2025-01-08": "08:00", "2025-01-09": "08:00", "2025-01-10": "08:00", 
+    "2025-01-11": "07:59", "2025-01-12": "07:59", "2025-01-13": "07:59", "2025-01-14": "07:58", 
+    "2025-01-15": "07:58", "2025-01-16": "07:58", "2025-01-17": "07:57", "2025-01-18": "07:57", 
+    "2025-01-19": "07:56", "2025-01-20": "07:55", "2025-01-21": "07:55", "2025-01-22": "07:54", 
+    "2025-01-23": "07:53", "2025-01-24": "07:53", "2025-01-25": "07:52", "2025-01-26": "07:51", 
+    "2025-01-27": "07:50", "2025-01-28": "07:50", "2025-01-29": "07:49", "2025-01-30": "07:48", 
+    "2025-01-31": "07:47", "2025-02-01": "07:46", "2025-02-02": "07:45", "2025-02-03": "07:44", 
+    "2025-02-04": "07:43", "2025-02-05": "07:42", "2025-02-06": "07:41", "2025-02-07": "07:40", 
+    "2025-02-08": "07:38", "2025-02-09": "07:37", "2025-02-10": "07:36", "2025-02-11": "07:35", 
+    "2025-02-12": "07:34", "2025-02-13": "07:32", "2025-02-14": "07:31", "2025-02-15": "07:30", 
+    "2025-02-16": "07:28", "2025-02-17": "07:27", "2025-02-18": "07:26", "2025-02-19": "07:24", 
+    "2025-02-20": "07:23", "2025-02-21": "07:21", "2025-02-22": "07:20", "2025-02-23": "07:19", 
+    "2025-02-24": "07:17", "2025-02-25": "07:16", "2025-02-26": "07:14", "2025-02-27": "07:13", 
+    "2025-02-28": "07:11"
+    };
+//End Sunrise Data Here//
+    function getSunrise(date) {
+        const formattedDate = date.toISOString().split('T')[0];
+        return sunriseChart[formattedDate] || null;
+    }
+
+    map.on('click', function(e) {
+        setHuntLocation(e.latlng.lat, e.latlng.lng);
+    });
+
+    document.getElementById('latLngInput').addEventListener('change', function() {
+        const input = this.value.trim();
+        const coords = input.split(',').map(c => parseFloat(c.trim()));
+        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+            setHuntLocation(coords[0], coords[1]);
+            map.setView([coords[0], coords[1]], 12);
+        } else {
+            alert("Please enter valid coordinates in the format: Latitude, Longitude");
+        }
+    });
+
+    function setHuntLocation(lat, lng) {
+        if (window.huntMarker) map.removeLayer(window.huntMarker);
+        window.huntMarker = L.marker([lat, lng]).addTo(map);
+        window.huntLocation = { lat, lng };
+    }
+
+    document.getElementById('calculateButton').addEventListener('click', function() {
+        const huntDateInput = document.getElementById('huntDate').value;
+        if (!huntDateInput) {
+            document.getElementById('results').innerHTML = "<p style='color: red;'>Please select a date published in the NGPC sunrise table for 2024-2025.</p>";
+            return;
+        }
+
+        const huntDate = new Date(huntDateInput);
+        const sunriseTime = getSunrise(huntDate);
+        if (!sunriseTime) {
+            document.getElementById('results').innerHTML = "<p style='color: red;'>Selected date is outside the available NGPC sunrise table range.</p>";
+            return;
+        }
+
+        if (!window.huntLocation) {
+            document.getElementById('results').innerHTML = "<p style='color: red;'>Please set your hunting location on the map or enter coordinates.</p>";
+            return;
+        }
+
+        calculateTimeline(window.huntLocation.lat, window.huntLocation.lng, sunriseTime, huntDateInput);
+    });
+
+    function calculateTimeline(huntLat, huntLng, sunriseTime, huntDateInput) {
+        const kearneyLat = 40.700364;
+        const kearneyLng = -99.084254;
+        const distanceMiles = calculateDistance(huntLat, huntLng, kearneyLat, kearneyLng);
+        const nineMileIncrements = Math.floor(Math.abs(distanceMiles) / 9);
+        let timeAdjustmentMinutes = (huntLng > kearneyLng ? -nineMileIncrements : nineMileIncrements);
+        const adjustedSunrise = adjustTime(sunriseTime, Math.ceil(timeAdjustmentMinutes));
+        const legalShootingTime = adjustTime(adjustedSunrise, -30);
+
+        const driveTime = parseInt(document.getElementById('driveTime').value);
+        const bufferTime = parseInt(document.getElementById('bufferTime').value);
+        const parkToSetTime = parseInt(document.getElementById('parkToSetTime').value);
+        const setToEstablishTime = parseInt(document.getElementById('setToEstablishTime').value);
+
+        const establishedBy = adjustTime(legalShootingTime, -bufferTime);
+        const setBy = adjustTime(establishedBy, -setToEstablishTime);
+        const parkedBy = adjustTime(setBy, -parkToSetTime);
+        const leaveBy = adjustTime(parkedBy, -driveTime);
+
+        const resultsText = `
+            <strong>Calculated Timeline</strong><br><br>
+            <strong>Chart Sunrise:</strong> ${sunriseTime}<br>
+            <em>(NGPC Sunrise Time for Kearney, Nebraska)</em><br><br>
+            <strong>Distance from Kearney:</strong> ${distanceMiles.toFixed(1)} miles<br>
+            <em>(Your East/West Distance from Kearney, not calculating north or south)</em><br><br>
+            <strong>9 Mile Increments:</strong> ${nineMileIncrements}<br>
+            <em>(${distanceMiles.toFixed(1)} divided by 9 = ${(distanceMiles / 9).toFixed(1)}, rounded down to closest increment)</em><br><br>
+            <strong>Time Adjustment:</strong> ${timeAdjustmentMinutes > 0 ? '+' : ''}${timeAdjustmentMinutes} minutes<br>
+            <em>(Subtract 1 minute for every 9 miles east, add 1 minute for every 9 miles west)</em><br><br>
+            <strong>Adjusted Sunrise:</strong> ${adjustedSunrise}<br>
+            <em>(Chart Sunrise adjusted by Time Adjustment)</em><br><br>
+            <strong>Legal Shooting Time:</strong> ${legalShootingTime} (30 minutes before Adjusted Sunrise)<br><br>
+            <strong>Established By:</strong> ${establishedBy} - Blind set, decoys placed, ready to hunt<br><br>
+            <strong>Set By:</strong> ${setBy} - Arrived at location, setup not started<br><br>
+            <strong>Parked By:</strong> ${parkedBy} - With a drive time of ${driveTime} minutes<br><br>
+            <strong>Leave By:</strong> ${leaveBy} - Leave by this time to arrive on time<br>
+        `;
+
+        document.getElementById('results').innerHTML = resultsText;
+
+        const copyText = `Tomorrow we need to leave by ${leaveBy}, legal shooting time is at ${legalShootingTime}, we have a ${driveTime} minute drive, and it will take us ${parkToSetTime} minutes to get to the spot and another ${setToEstablishTime} minutes to get everything set up. We are going to leave ourselves a ${bufferTime} minute buffer before legal shooting time.\n\nSunrise: ${adjustedSunrise}\nLST: ${legalShootingTime}\nEstablished: ${establishedBy}\nSet: ${setBy}\nParked: ${parkedBy}\nLeave By: ${leaveBy}`;
+
+        document.getElementById('copyButton').onclick = function() {
+            navigator.clipboard.writeText(copyText);
+            alert("Timeline copied to clipboard!");
+        };
+    }
+
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 3958.8;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    function adjustTime(time, minutes) {
+        let [hour, min] = time.split(':').map(Number);
+        let date = new Date();
+        date.setHours(hour);
+        date.setMinutes(min + minutes);
+        return date.toTimeString().slice(0, 5);
+    }
+</script>
+
+</body>
+</html>
