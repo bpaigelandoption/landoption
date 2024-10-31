@@ -69,12 +69,18 @@
 </head>
 <body>
 
-<h3>Hunting Planner</h3>
+<h3>Legal Sunrise & Hunt Planner</h3>
+
+<p>
+    This tool is designed to calculate legal sunrise based on the NGPC published sunrise table in the 2024 Small Game Guide. 
+    You can find the guide <a href="http://digital.outdoornebraska.gov/i/1523966-small-game-and-waterfowl-guide-2024-25-web?_gl=1*fo00wh*_gcl_au*MzQ1MjkyOTAzLjE3MzAzMTQ5ODI.*_ga*MzgyNjM3NTA5LjE3MzAzMTQ5ODI.*_ga_MFGSGX9CRV*MTczMDM0MDI1MC4yLjAuMTczMDM0MDMzOC4wLjAuMA.." target="_blank">here</a> on page 44.
+    This planner also allows you to reverse plan your timeline for the hunt and easily share it with friends.
+</p>
 
 <div id="plannerForm">
     <label for="huntDate">Hunting Date:</label>
     <input type="date" id="huntDate">
-    <div class="help-text">Select the date for your hunting trip.</div>
+    <div class="help-text">Select the date for your hunting trip "This Calculator only works between 9/1/2024 and 2/28/2025.</div>
 
     <label for="driveTime">Drive Time (minutes):</label>
     <input type="number" id="driveTime" min="0" value="60">
@@ -94,7 +100,7 @@
 
     <label for="latLngInput">Hunting Location (Latitude, Longitude):</label>
     <input type="text" id="latLngInput" placeholder="e.g., 40.30695, -96.471">
-    <div class="help-text">Enter coordinates to set your hunt location, or click on the map.</div>
+    <div class="help-text">Enter the coordinates of your hunt location, OR select your location on the map then click calculate to continue.</div>
 
     <button id="calculateButton">Calculate Timeline</button>
 </div>
