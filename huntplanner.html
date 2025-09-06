@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hunting Planner</title>
+    <title>Hunting Planner 2025</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         :root { --panel-width: 380px; }
@@ -15,6 +15,7 @@
         .map-ui-container {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 1001;
+            transition: opacity 0.3s ease;
         }
         .map-ui-container > * {
             pointer-events: auto;
@@ -41,7 +42,6 @@
             background-color: #333;
         }
 
-        /* Container for the mobile button, hidden on desktop */
         .mobile-button-container {
             display: none;
         }
@@ -180,35 +180,38 @@
 
         /* --- MOBILE STYLES --- */
         @media (max-width: 768px) {
-            body { overflow: auto; } /* Allow scrolling on mobile if panel is tall */
+            body { overflow: hidden; }
 
-            /* NEW: Change main layout to a vertical stack */
             .main-container {
                 display: flex;
                 flex-direction: column;
-                height: 100vh;
+                /* Use dynamic viewport height to account for mobile browser UI */
+                height: 100dvh;
+                height: 100vh; /* Fallback for older browsers */
             }
 
-            /* NEW: Map takes up top 85% of the screen */
+            /* UPDATED: Map now takes up 82% of the screen */
             .map-section {
-                position: relative; /* Override absolute positioning */
-                height: 85vh;
+                position: relative;
+                height: 82dvh;
+                height: 82vh; /* Fallback */
                 flex-shrink: 0;
             }
 
-            /* NEW: Dedicated container for the button takes up bottom 15% */
+            /* UPDATED: Button container takes up 18% of the screen */
             .mobile-button-container {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                height: 15vh;
+                height: 18dvh;
+                height: 18vh; /* Fallback */
                 background-color: #1B1B1B;
                 padding: 15px;
                 box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
                 z-index: 1002;
+                transition: transform 0.3s ease;
             }
 
-            /* NEW: Reset button positioning to sit inside its container */
             .mobile-toggle {
                 width: 100%;
                 max-width: 400px;
@@ -219,7 +222,9 @@
             }
             .controls-panel {
                 position: fixed; top: auto; bottom: 0; left: 0; right: 0; width: 100%;
-                height: 85vh; max-height: 85vh; border-left: none;
+                height: 100%; /* Take full screen when open */
+                max-height: 100%;
+                border-left: none;
                 border-top: 1px solid #333; border-radius: 20px 20px 0 0;
                 transform: translateY(100%);
             }
@@ -228,6 +233,15 @@
             .panel-header::before {
                 content: ''; display: block; width: 50px; height: 5px;
                 background: #555; border-radius: 3px; margin: -10px auto 15px;
+            }
+
+            /* NEW: Hide search and bottom button when the planning panel is open */
+            body.panel-is-open .map-ui-container {
+                opacity: 0;
+                pointer-events: none;
+            }
+            body.panel-is-open .mobile-button-container {
+                transform: translateY(100%);
             }
         }
     </style>
@@ -359,7 +373,7 @@
 <script>
     // Kearney, NE coordinates for reference
     const KEARNEY_COORDS = { lat: 40.6993, lng: -99.0817 };
-    const MILES_PER_MINUTE = 9; // 9 miles = 1 minute adjustment
+    const MILES_PER_MINUTE = 9;
 
     const sunData={"2025-09-01":{sunrise:"7:04",sunset:"8:08"},"2025-09-02":{sunrise:"7:05",sunset:"8:06"},"2025-09-03":{sunrise:"7:06",sunset:"8:05"},"2025-09-04":{sunrise:"7:07",sunset:"8:03"},"2025-09-05":{sunrise:"7:08",sunset:"8:01"},"2025-09-06":{sunrise:"7:09",sunset:"8:00"},"2025-09-07":{sunrise:"7:10",sunset:"7:58"},"2025-09-08":{sunrise:"7:11",sunset:"7:56"},"2025-09-09":{sunrise:"7:12",sunset:"7:55"},"2025-09-10":{sunrise:"7:12",sunset:"7:53"},"2025-09-11":{sunrise:"7:13",sunset:"7:51"},"2025-09-12":{sunrise:"7:14",sunset:"7:50"},"2025-09-13":{sunrise:"7:15",sunset:"7:48"},"2025-09-14":{sunrise:"7:16",sunset:"7:46"},"2025-09-15":{sunrise:"7:17",sunset:"7:45"},"2025-09-16":{sunrise:"7:18",sunset:"7:43"},"2025-09-17":{sunrise:"7:19",sunset:"7:41"},"2025-09-18":{sunrise:"7:20",sunset:"7:40"},"2025-09-19":{sunrise:"7:21",sunset:"7:38"},"2025-09-20":{sunrise:"7:22",sunset:"7:36"},"2025-09-21":{sunrise:"7:23",sunset:"7:34"},"2025-09-22":{sunrise:"7:24",sunset:"7:33"},"2025-09-23":{sunrise:"7:25",sunset:"7:31"},"2025-09-24":{sunrise:"7:26",sunset:"7:29"},"2025-09-25":{sunrise:"7:27",sunset:"7:28"},"2025-09-26":{sunrise:"7:28",sunset:"7:26"},"2025-09-27":{sunrise:"7:29",sunset:"7:24"},"2025-09-28":{sunrise:"7:30",sunset:"7:23"},"2025-09-29":{sunrise:"7:31",sunset:"7:21"},"2025-09-30":{sunrise:"7:32",sunset:"7:19"},"2025-10-01":{sunrise:"7:33",sunset:"7:18"},"2025-10-02":{sunrise:"7:34",sunset:"7:16"},"2025-10-03":{sunrise:"7:35",sunset:"7:14"},"2025-10-04":{sunrise:"7:36",sunset:"7:13"},"2025-10-05":{sunrise:"7:37",sunset:"7:11"},"2025-10-06":{sunrise:"7:38",sunset:"7:10"},"2025-10-07":{sunrise:"7:39",sunset:"7:08"},"2025-10-08":{sunrise:"7:40",sunset:"7:06"},"2025-10-09":{sunrise:"7:42",sunset:"7:05"},"2025-10-10":{sunrise:"7:43",sunset:"7:03"},"2025-10-11":{sunrise:"7:44",sunset:"7:02"},"2025-10-12":{sunrise:"7:45",sunset:"7:00"},"2025-10-13":{sunrise:"7:46",sunset:"6:59"},"2025-10-14":{sunrise:"7:47",sunset:"6:57"},"2025-10-15":{sunrise:"7:48",sunset:"6:55"},"2025-10-16":{sunrise:"7:49",sunset:"6:54"},"2025-10-17":{sunrise:"7:50",sunset:"6:52"},"2025-10-18":{sunrise:"7:51",sunset:"6:51"},"2025-10-19":{sunrise:"7:52",sunset:"6:50"},"2025-10-20":{sunrise:"7:53",sunset:"6:48"},"2025-10-21":{sunrise:"7:55",sunset:"6:47"},"2025-10-22":{sunrise:"7:56",sunset:"6:45"},"2025-10-23":{sunrise:"7:57",sunset:"6:44"},"2025-10-24":{sunrise:"7:58",sunset:"6:42"},"2025-10-25":{sunrise:"7:59",sunset:"6:41"},"2025-10-26":{sunrise:"8:00",sunset:"6:40"},"2025-10-27":{sunrise:"8:01",sunset:"6:38"},"2025-10-28":{sunrise:"8:02",sunset:"6:37"},"2025-10-29":{sunrise:"8:04",sunset:"6:36"},"2025-10-30":{sunrise:"8:05",sunset:"6:35"},"2025-10-31":{sunrise:"8:06",sunset:"6:33"},"2025-11-01":{sunrise:"8:07",sunset:"6:32"},"2025-11-02":{sunrise:"7:08",sunset:"5:31"},"2025-11-03":{sunrise:"7:09",sunset:"5:30"},"2025-11-04":{sunrise:"7:11",sunset:"5:29"},"2025-11-05":{sunrise:"7:12",sunset:"5:28"},"2025-11-06":{sunrise:"7:13",sunset:"5:27"},"2025-11-07":{sunrise:"7:14",sunset:"5:25"},"2025-11-08":{sunrise:"7:15",sunset:"5:24"},"2025-11-09":{sunrise:"7:16",sunset:"5:23"},"2025-11-10":{sunrise:"7:18",sunset:"5:22"},"2025-11-11":{sunrise:"7:19",sunset:"5:21"},"2025-11-12":{sunrise:"7:20",sunset:"5:21"},"2025-11-13":{sunrise:"7:21",sunset:"5:20"},"2025-11-14":{sunrise:"7:22",sunset:"5:19"},"2025-11-15":{sunrise:"7:24",sunset:"5:18"},"2025-11-16":{sunrise:"7:25",sunset:"5:17"},"2025-11-17":{sunrise:"7:26",sunset:"5:16"},"2025-11-18":{sunrise:"7:27",sunset:"5:16"},"2025-11-19":{sunrise:"7:28",sunset:"5:15"},"2025-11-20":{sunrise:"7:29",sunset:"5:14"},"2025-11-21":{sunrise:"7:30",sunset:"5:14"},"2025-11-22":{sunrise:"7:32",sunset:"5:13"},"2025-11-23":{sunrise:"7:33",sunset:"5:13"},"2025-11-24":{sunrise:"7:34",sunset:"5:12"},"2025-11-25":{sunrise:"7:35",sunset:"5:12"},"2025-11-26":{sunrise:"7:36",sunset:"5:11"},"2025-11-27":{sunrise:"7:37",sunset:"5:11"},"2025-11-28":{sunrise:"7:38",sunset:"5:10"},"2025-11-29":{sunrise:"7:39",sunset:"5:10"},"2025-11-30":{sunrise:"7:40",sunset:"5:10"},"2025-12-01":{sunrise:"7:41",sunset:"5:10"},"2025-12-02":{sunrise:"7:42",sunset:"5:09"},"2025-12-03":{sunrise:"7:43",sunset:"5:09"},"2025-12-04":{sunrise:"7:44",sunset:"5:09"},"2025-12-05":{sunrise:"7:45",sunset:"5:09"},"2025-12-06":{sunrise:"7:46",sunset:"5:09"},"2025-12-07":{sunrise:"7:47",sunset:"5:09"},"2025-12-08":{sunrise:"7:48",sunset:"5:09"},"2025-12-09":{sunrise:"7:49",sunset:"5:09"},"2025-12-10":{sunrise:"7:50",sunset:"5:09"},"2025-12-11":{sunrise:"7:50",sunset:"5:09"},"2025-12-12":{sunrise:"7:51",sunset:"5:09"},"2025-12-13":{sunrise:"7:52",sunset:"5:09"},"2025-12-14":{sunrise:"7:53",sunset:"5:10"},"2025-12-15":{sunrise:"7:53",sunset:"5:10"},"2025-12-16":{sunrise:"7:54",sunset:"5:10"},"2025-12-17":{sunrise:"7:55",sunset:"5:11"},"2025-12-18":{sunrise:"7:55",sunset:"5:11"},"2025-12-19":{sunrise:"7:56",sunset:"5:11"},"2025-12-20":{sunrise:"7:56",sunset:"5:12"},"2025-12-21":{sunrise:"7:57",sunset:"5:12"},"2025-12-22":{sunrise:"7:57",sunset:"5:13"},"2025-12-23":{sunrise:"7:58",sunset:"5:13"},"2025-12-24":{sunrise:"7:58",sunset:"5:14"},"2025-12-25":{sunrise:"7:59",sunset:"5:15"},"2025-12-26":{sunrise:"7:59",sunset:"5:15"},"2025-12-27":{sunrise:"7:59",sunset:"5:16"},"2025-12-28":{sunrise:"8:00",sunset:"5:17"},"2025-12-29":{sunrise:"8:00",sunset:"5:17"},"2025-12-30":{sunrise:"8:00",sunset:"5:18"},"2025-12-31":{sunrise:"8:00",sunset:"5:19"},"2026-01-01":{sunrise:"8:00",sunset:"5:20"},"2026-01-02":{sunrise:"8:00",sunset:"5:21"},"2026-01-03":{sunrise:"8:00",sunset:"5:22"},"2026-01-04":{sunrise:"8:00",sunset:"5:23"},"2026-01-05":{sunrise:"8:00",sunset:"5:23"},"2026-01-06":{sunrise:"8:00",sunset:"5:24"},"2026-01-07":{sunrise:"8:00",sunset:"5:25"},"2026-01-08":{sunrise:"8:00",sunset:"5:26"},"2026-01-09":{sunrise:"8:00",sunset:"5:27"},"2026-01-10":{sunrise:"8:00",sunset:"5:28"},"2026-01-11":{sunrise:"7:59",sunset:"5:29"},"2026-01-12":{sunrise:"7:59",sunset:"5:31"},"2026-01-13":{sunrise:"7:59",sunset:"5:32"},"2026-01-14":{sunrise:"7:58",sunset:"5:33"},"2026-01-15":{sunrise:"7:58",sunset:"5:34"},"2026-01-16":{sunrise:"7:58",sunset:"5:35"},"2026-01-17":{sunrise:"7:57",sunset:"5:36"},"2026-01-18":{sunrise:"7:57",sunset:"5:37"},"2026-01-19":{sunrise:"7:56",sunset:"5:38"},"2026-01-20":{sunrise:"7:56",sunset:"5:40"},"2026-01-21":{sunrise:"7:55",sunset:"5:41"},"2026-01-22":{sunrise:"7:54",sunset:"5:42"},"2026-01-23":{sunrise:"7:54",sunset:"5:43"},"2026-01-24":{sunrise:"7:53",sunset:"5:44"},"2026-01-25":{sunrise:"7:52",sunset:"5:46"},"2026-01-26":{sunrise:"7:51",sunset:"5:47"},"2026-01-27":{sunrise:"7:51",sunset:"5:48"},"2026-01-28":{sunrise:"7:50",sunset:"5:49"},"2026-01-29":{sunrise:"7:49",sunset:"5:51"},"2026-01-30":{sunrise:"7:48",sunset:"5:52"},"2026-01-31":{sunrise:"7:47",sunset:"5:53"},"2026-02-01":{sunrise:"7:46",sunset:"5:54"},"2026-02-02":{sunrise:"7:45",sunset:"5:55"},"2026-02-03":{sunrise:"7:44",sunset:"5:57"},"2026-02-04":{sunrise:"7:43",sunset:"5:58"},"2026-02-05":{sunrise:"7:42",sunset:"5:59"},"2026-02-06":{sunrise:"7:41",sunset:"6:00"},"2026-02-07":{sunrise:"7:40",sunset:"6:02"},"2026-02-08":{sunrise:"7:39",sunset:"6:03"},"2026-02-09":{sunrise:"7:37",sunset:"6:04"},"2026-02-10":{sunrise:"7:36",sunset:"6:05"},"2026-02-11":{sunrise:"7:35",sunset:"6:06"},"2026-02-12":{sunrise:"7:34",sunset:"6:08"},"2026-02-13":{sunrise:"7:33",sunset:"6:09"},"2026-02-14":{sunrise:"7:31",sunset:"6:10"},"2026-02-15":{sunrise:"7:30",sunset:"6:11"},"2026-02-16":{sunrise:"7:29",sunset:"6:13"},"2026-02-17":{sunrise:"7:27",sunset:"6:14"},"2026-02-18":{sunrise:"7:26",sunset:"6:15"},"2026-02-19":{sunrise:"7:25",sunset:"6:16"},"2026-02-20":{sunrise:"7:23",sunset:"6:17"},"2026-02-21":{sunrise:"7:22",sunset:"6:18"},"2026-02-22":{sunrise:"7:20",sunset:"6:20"},"2026-02-23":{sunrise:"7:19",sunset:"6:21"},"2026-02-24":{sunrise:"7:17",sunset:"6:22"},"2026-02-25":{sunrise:"7:16",sunset:"6:23"},"2026-02-26":{sunrise:"7:15",sunset:"6:24"},"2026-02-27":{sunrise:"7:13",sunset:"6:25"},"2026-02-28":{sunrise:"7:12",sunset:"6:27"}};
 
@@ -420,10 +434,7 @@
 
         map.addListener("click", (e) => placeMarker(e.latLng));
 
-        // --- Setup all event listeners ---
         addEventListeners();
-
-        // Set date and get user location
         setTodaysDate();
         tryGeolocation();
     }
@@ -432,21 +443,14 @@
         document.getElementById('latLngInput').addEventListener('change', handleLatLngInput);
         document.getElementById('huntDate').addEventListener('change', updateCalculateButton);
         document.getElementById('calculateButton').addEventListener('click', calculateTimeline);
-        document.getElementById('panelClose').addEventListener('click', () => {
-            document.getElementById('controlsPanel').classList.remove('show');
-            document.getElementById('mobileToggle').textContent = 'Plan Your Hunt';
+        
+        // Panel visibility controls
+        document.getElementById('mobileToggle').addEventListener('click', () => {
+            const isPanelOpen = document.getElementById('controlsPanel').classList.contains('show');
+            setPanelVisibility(!isPanelOpen);
         });
+        document.getElementById('panelClose').addEventListener('click', () => setPanelVisibility(false));
 
-        // Setup mobile toggle button
-        const mobileToggle = document.getElementById('mobileToggle');
-        const controlsPanel = document.getElementById('controlsPanel');
-        mobileToggle.addEventListener('click', function() {
-            const isShown = controlsPanel.classList.toggle('show');
-            const buttonText = isLocationSet ? 'Plan Your Hunt' : 'Select Hunt Location';
-            mobileToggle.textContent = isShown ? 'Close' : buttonText;
-        });
-
-        // Setup game type selector buttons
         document.querySelectorAll('.game-type-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.game-type-btn').forEach(b => b.classList.remove('active'));
@@ -455,13 +459,24 @@
             });
         });
         
-        // Setup drive time adjustment buttons
         document.querySelectorAll('.time-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const amount = parseInt(this.dataset.adjust, 10);
                 adjustDriveTime(amount);
             });
         });
+    }
+    
+    // NEW: Central function to control the panel's visibility and surrounding UI
+    function setPanelVisibility(show) {
+        const controlsPanel = document.getElementById('controlsPanel');
+        const mobileToggle = document.getElementById('mobileToggle');
+        
+        controlsPanel.classList.toggle('show', show);
+        document.body.classList.toggle('panel-is-open', show);
+
+        const buttonText = isLocationSet ? 'Plan Your Hunt' : 'Select Hunt Location';
+        mobileToggle.textContent = show ? 'Close' : buttonText;
     }
 
     function tryGeolocation() {
@@ -520,7 +535,9 @@
 
         const mobileToggle = document.getElementById('mobileToggle');
         mobileToggle.classList.remove('initial');
-        mobileToggle.textContent = 'Plan Your Hunt';
+        if (!document.getElementById('controlsPanel').classList.contains('show')) {
+             mobileToggle.textContent = 'Plan Your Hunt';
+        }
 
         if (currentMarker) {
             currentMarker.setPosition(location);
@@ -626,7 +643,7 @@
 
     function updateDriveTime(route) {
         baseDriveTime = Math.round(route.legs[0].duration.value / 60);
-        driveTimeAdjustment = 0; // Reset adjustment when a new route is selected
+        driveTimeAdjustment = 0;
         const totalTime = baseDriveTime + driveTimeAdjustment;
         document.getElementById('driveTime').value = totalTime;
         document.getElementById('adjustedTime').textContent = totalTime;
@@ -664,7 +681,7 @@
 
             const sunInfo = sunData[huntDateInput];
             let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number);
-            if (sunsetHour < 12) sunsetHour += 12; // Simple PM conversion
+            if (sunsetHour < 12) sunsetHour += 12;
             const correctedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`;
 
             const locationInfo = calculateDistanceFromKearney(huntLocation.lat, huntLocation.lng);
@@ -776,7 +793,7 @@
         const spinner = document.getElementById('buttonSpinner');
         button.disabled = false;
         spinner.style.display = 'none';
-        updateCalculateButton(); // Reset text correctly based on state
+        updateCalculateButton();
     }
 
     function setTodaysDate() {
@@ -793,7 +810,7 @@
         const [hours, minutes] = time24.split(':');
         let h = parseInt(hours, 10);
         const ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12; // convert h to 12-hour format
+        h = h % 12 || 12;
         return `${h}:${String(minutes).padStart(2, '0')} ${ampm}`;
     }
 
@@ -811,6 +828,6 @@
     }
 
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy5kkSZkLS2ApeXHteQ5MuVIL53L972Jw&libraries=places&callback=initMap"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=YAIzaSyAy5kkSZkLS2ApeXHteQ5MuVIL53L972Jw&libraries=places&callback=initMap"></script>
 </body>
 </html>
