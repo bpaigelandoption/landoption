@@ -453,6 +453,8 @@
         });
         // FIX 3: Make the panel's 'x' button work correctly
         document.getElementById('panelClose').addEventListener('click', () => setPanelVisibility(false));
+        // *** ADD THIS LINE ***
+        document.getElementById('panelClose').addEventListener('click', () => setPanelVisibility(false));
 
         document.querySelectorAll('.game-type-btn').forEach(btn => {
             btn.addEventListener('click', function() {
