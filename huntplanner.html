@@ -7,13 +7,75 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1B1B1B; color: #EAEAEA; overflow: hidden; }
-        
-        /* FIX: Layout now uses absolute/fixed positioning to float elements over the map */
         .main-container { position: relative; height: 100vh; width: 100%; }
         .map-section { position: absolute; top: 0; left: 0; height: 100%; width: 100%; }
         #map { height: 100%; width: 100%; }
-        #search-input { position: absolute; top: 20px; left: 20px; right: 400px; padding: 15px 20px; font-size: 1rem; border: 2px solid #2C2C2E; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 1001; background: #2C2C2E; color: #EAEAEA; }
+
+        /* FIX: Container for all floating UI to ensure correct stacking */
+        .map-ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows clicks to pass through to the map */
+            z-index: 1001;
+        }
+
+        #search-input {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            border: 2px solid #2C2C2E;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            background: #2C2C2E;
+            color: #EAEAEA;
+            pointer-events: auto; /* Re-enable pointer events for the input */
+        }
         
+        .custom-map-control-button {
+            background-color: #2C2C2E;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            color: #EAEAEA;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 38px;
+            margin: 10px;
+            padding: 0 15px;
+            text-align: center;
+            pointer-events: auto; /* Re-enable pointer events for the button */
+        }
+        .custom-map-control-button:hover { background-color: #3C3C3E; border-color: #4CAF50; }
+
+        .mobile-toggle {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: #1B1B1B;
+            border: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            line-height: 56px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            pointer-events: auto; /* Re-enable pointer events for the button */
+        }
+
         .controls-panel {
             position: absolute;
             top: 0;
@@ -51,37 +113,25 @@
         .status-calculating { background: rgba(255, 191, 0, 0.1); color: #FFBF00; border: 1px solid rgba(255, 191, 0, 0.3); }
         .btn { background: #4CAF50; color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .route-options, .drive-time-adjuster, .results-section { display: none; }
-        .route-options.show, .drive-time-adjuster.show, .results-section.show { display: block; }
-        
-        /* NEW: Custom button style for the "My Location" button on the map */
-        .custom-map-control-button {
-            background-color: #2C2C2E;
-            border: 2px solid #333;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            color: #EAEAEA;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            line-height: 38px;
-            margin: 10px;
-            padding: 0 15px;
-            text-align: center;
-        }
-        .custom-map-control-button:hover {
-            background-color: #3C3C3E;
-            border-color: #4CAF50;
-        }
-        
-        .mobile-toggle {
-            display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1002; background: #4CAF50; color: #1B1B1B; border: none; width: 56px; height: 56px; border-radius: 50%; font-size: 1.8rem; line-height: 56px; text-align: center; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        
-        /* --- Mobile Styles --- */
+        .route-options { display: none; margin-top: 15px; }
+        .route-options.show { display: block; }
+        .route-option { background: #1B1B1B; border: 2px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 8px; cursor: pointer; }
+        .route-option:hover { border-color: #4CAF50; }
+        .route-option.selected { border-color: #FFBF00; background: rgba(255, 191, 0, 0.1); }
+        .route-summary { display: flex; justify-content: space-between; align-items: center; }
+        .route-time { font-weight: bold; color: #4CAF50; font-size: 1.1rem; }
+        .route-distance { color: #999; font-size: 0.9rem; }
+        .route-description { margin-top: 5px; font-size: 0.8rem; color: #999; }
+        .drive-time-adjuster { display: none; margin-top: 15px; background: #1B1B1B; padding: 15px; border-radius: 6px; border: 1px solid #333; }
+        .drive-time-adjuster.show { display: block; }
+        .time-adjuster-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .time-btn { background: #4CAF50; color: #1B1B1B; border: none; width: 35px; height: 35px; border-radius: 4px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+        .time-display { flex: 1; text-align: center; font-size: 1.1rem; font-weight: bold; color: #FFBF00; }
+        .results-section { display: none; }
+        .results-section.show { display: block; }
+
         @media (max-width: 768px) {
-            #search-input { right: 20px; top: 10px; left: 10px; }
+            #search-input { right: 20px; }
             .controls-panel {
                 position: fixed;
                 top: auto;
@@ -95,21 +145,19 @@
                 border-radius: 20px 20px 0 0;
                 transform: translateY(100%);
             }
-            .controls-panel.show {
-                transform: translateY(0);
-            }
-            .mobile-toggle {
-                display: block;
-            }
-            .panel-content { padding: 15px; }
+            .controls-panel.show { transform: translateY(0); }
+            .mobile-toggle { display: block; }
         }
     </style>
 </head>
 <body>
 <div class="main-container">
     <div class="map-section">
-        <input type="text" id="search-input" placeholder="Search for your hunting location...">
         <div id="map"></div>
+    </div>
+    <div class="map-ui-container">
+        <input type="text" id="search-input" placeholder="Search for your hunting location...">
+        <button class="mobile-toggle" id="mobileToggle">^</button>
     </div>
     <div class="controls-panel" id="controlsPanel">
         <div class="panel-header"> <h1>Hunt Planner</h1> <p>Legal shooting times & timeline calculator</p> </div>
@@ -121,11 +169,9 @@
             <div id="resultsSection" class="results-section"> <div class="step-header"> <div class="step-number">✓</div> <div class="step-title">Your Timeline</div> </div> <div id="resultsContent"></div> <div class="copy-section"> <button id="copyButton" class="btn btn-copy"> Copy Plan to Share </button> </div> </div>
         </div>
     </div>
-    <button class="mobile-toggle" id="mobileToggle">^</button>
 </div>
 
 <script>
-    // Data and global variables
     const sunData={"2025-09-01":{sunrise:"7:04",sunset:"8:08"},"2025-09-02":{sunrise:"7:05",sunset:"8:06"},"2025-09-03":{sunrise:"7:06",sunset:"8:05"},"2025-09-04":{sunrise:"7:07",sunset:"8:03"},"2025-09-05":{sunrise:"7:08",sunset:"8:01"},"2025-09-06":{sunrise:"7:09",sunset:"8:00"},"2025-09-07":{sunrise:"7:10",sunset:"7:58"},"2025-09-08":{sunrise:"7:11",sunset:"7:56"},"2025-09-09":{sunrise:"7:12",sunset:"7:55"},"2025-09-10":{sunrise:"7:12",sunset:"7:53"},"2025-09-11":{sunrise:"7:13",sunset:"7:51"},"2025-09-12":{sunrise:"7:14",sunset:"7:50"},"2025-09-13":{sunrise:"7:15",sunset:"7:48"},"2025-09-14":{sunrise:"7:16",sunset:"7:46"},"2025-09-15":{sunrise:"7:17",sunset:"7:45"},"2025-09-16":{sunrise:"7:18",sunset:"7:43"},"2025-09-17":{sunrise:"7:19",sunset:"7:41"},"2025-09-18":{sunrise:"7:20",sunset:"7:40"},"2025-09-19":{sunrise:"7:21",sunset:"7:38"},"2025-09-20":{sunrise:"7:22",sunset:"7:36"},"2025-09-21":{sunrise:"7:23",sunset:"7:34"},"2025-09-22":{sunrise:"7:24",sunset:"7:33"},"2025-09-23":{sunrise:"7:25",sunset:"7:31"},"2025-09-24":{sunrise:"7:26",sunset:"7:29"},"2025-09-25":{sunrise:"7:27",sunset:"7:28"},"2025-09-26":{sunrise:"7:28",sunset:"7:26"},"2025-09-27":{sunrise:"7:29",sunset:"7:24"},"2025-09-28":{sunrise:"7:30",sunset:"7:23"},"2025-09-29":{sunrise:"7:31",sunset:"7:21"},"2025-09-30":{sunrise:"7:32",sunset:"7:19"},"2025-10-01":{sunrise:"7:33",sunset:"7:18"},"2025-10-02":{sunrise:"7:34",sunset:"7:16"},"2025-10-03":{sunrise:"7:35",sunset:"7:14"},"2025-10-04":{sunrise:"7:36",sunset:"7:13"},"2025-10-05":{sunrise:"7:37",sunset:"7:11"},"2025-10-06":{sunrise:"7:38",sunset:"7:10"},"2025-10-07":{sunrise:"7:39",sunset:"7:08"},"2025-10-08":{sunrise:"7:40",sunset:"7:06"},"2025-10-09":{sunrise:"7:42",sunset:"7:05"},"2025-10-10":{sunrise:"7:43",sunset:"7:03"},"2025-10-11":{sunrise:"7:44",sunset:"7:02"},"2025-10-12":{sunrise:"7:45",sunset:"7:00"},"2025-10-13":{sunrise:"7:46",sunset:"6:59"},"2025-10-14":{sunrise:"7:47",sunset:"6:57"},"2025-10-15":{sunrise:"7:48",sunset:"6:55"},"2025-10-16":{sunrise:"7:49",sunset:"6:54"},"2025-10-17":{sunrise:"7:50",sunset:"6:52"},"2025-10-18":{sunrise:"7:51",sunset:"6:51"},"2025-10-19":{sunrise:"7:52",sunset:"6:50"},"2025-10-20":{sunrise:"7:53",sunset:"6:48"},"2025-10-21":{sunrise:"7:55",sunset:"6:47"},"2025-10-22":{sunrise:"7:56",sunset:"6:45"},"2025-10-23":{sunrise:"7:57",sunset:"6:44"},"2025-10-24":{sunrise:"7:58",sunset:"6:42"},"2025-10-25":{sunrise:"7:59",sunset:"6:41"},"2025-10-26":{sunrise:"8:00",sunset:"6:40"},"2025-10-27":{sunrise:"8:01",sunset:"6:38"},"2025-10-28":{sunrise:"8:02",sunset:"6:37"},"2025-10-29":{sunrise:"8:04",sunset:"6:36"},"2025-10-30":{sunrise:"8:05",sunset:"6:35"},"2025-10-31":{sunrise:"8:06",sunset:"6:33"},"2025-11-01":{sunrise:"8:07",sunset:"6:32"},"2025-11-02":{sunrise:"7:08",sunset:"5:31"},"2025-11-03":{sunrise:"7:09",sunset:"5:30"},"2025-11-04":{sunrise:"7:11",sunset:"5:29"},"2025-11-05":{sunrise:"7:12",sunset:"5:28"},"2025-11-06":{sunrise:"7:13",sunset:"5:27"},"2025-11-07":{sunrise:"7:14",sunset:"5:25"},"2025-11-08":{sunrise:"7:15",sunset:"5:24"},"2025-11-09":{sunrise:"7:16",sunset:"5:23"},"2025-11-10":{sunrise:"7:18",sunset:"5:22"},"2025-11-11":{sunrise:"7:19",sunset:"5:21"},"2025-11-12":{sunrise:"7:20",sunset:"5:21"},"2025-11-13":{sunrise:"7:21",sunset:"5:20"},"2025-11-14":{sunrise:"7:22",sunset:"5:19"},"2025-11-15":{sunrise:"7:24",sunset:"5:18"},"2025-11-16":{sunrise:"7:25",sunset:"5:17"},"2025-11-17":{sunrise:"7:26",sunset:"5:16"},"2025-11-18":{sunrise:"7:27",sunset:"5:16"},"2025-11-19":{sunrise:"7:28",sunset:"5:15"},"2025-11-20":{sunrise:"7:29",sunset:"5:14"},"2025-11-21":{sunrise:"7:30",sunset:"5:14"},"2025-11-22":{sunrise:"7:32",sunset:"5:13"},"2025-11-23":{sunrise:"7:33",sunset:"5:13"},"2025-11-24":{sunrise:"7:34",sunset:"5:12"},"2025-11-25":{sunrise:"7:35",sunset:"5:12"},"2025-11-26":{sunrise:"7:36",sunset:"5:11"},"2025-11-27":{sunrise:"7:37",sunset:"5:11"},"2025-11-28":{sunrise:"7:38",sunset:"5:10"},"2025-11-29":{sunrise:"7:39",sunset:"5:10"},"2025-11-30":{sunrise:"7:40",sunset:"5:10"},"2025-12-01":{sunrise:"7:41",sunset:"5:10"},"2025-12-02":{sunrise:"7:42",sunset:"5:09"},"2025-12-03":{sunrise:"7:43",sunset:"5:09"},"2025-12-04":{sunrise:"7:44",sunset:"5:09"},"2025-12-05":{sunrise:"7:45",sunset:"5:09"},"2025-12-06":{sunrise:"7:46",sunset:"5:09"},"2025-12-07":{sunrise:"7:47",sunset:"5:09"},"2025-12-08":{sunrise:"7:48",sunset:"5:09"},"2025-12-09":{sunrise:"7:49",sunset:"5:09"},"2025-12-10":{sunrise:"7:50",sunset:"5:09"},"2025-12-11":{sunrise:"7:50",sunset:"5:09"},"2025-12-12":{sunrise:"7:51",sunset:"5:09"},"2025-12-13":{sunrise:"7:52",sunset:"5:09"},"2025-12-14":{sunrise:"7:53",sunset:"5:10"},"2025-12-15":{sunrise:"7:53",sunset:"5:10"},"2025-12-16":{sunrise:"7:54",sunset:"5:10"},"2025-12-17":{sunrise:"7:55",sunset:"5:11"},"2025-12-18":{sunrise:"7:55",sunset:"5:11"},"2025-12-19":{sunrise:"7:56",sunset:"5:11"},"2025-12-20":{sunrise:"7:56",sunset:"5:12"},"2025-12-21":{sunrise:"7:57",sunset:"5:12"},"2025-12-22":{sunrise:"7:57",sunset:"5:13"},"2025-12-23":{sunrise:"7:58",sunset:"5:13"},"2025-12-24":{sunrise:"7:58",sunset:"5:14"},"2025-12-25":{sunrise:"7:59",sunset:"5:15"},"2025-12-26":{sunrise:"7:59",sunset:"5:15"},"2025-12-27":{sunrise:"7:59",sunset:"5:16"},"2025-12-28":{sunrise:"8:00",sunset:"5:17"},"2025-12-29":{sunrise:"8:00",sunset:"5:17"},"2025-12-30":{sunrise:"8:00",sunset:"5:18"},"2025-12-31":{sunrise:"8:00",sunset:"5:19"},"2026-01-01":{sunrise:"8:00",sunset:"5:20"},"2026-01-02":{sunrise:"8:00",sunset:"5:21"},"2026-01-03":{sunrise:"8:00",sunset:"5:22"},"2026-01-04":{sunrise:"8:00",sunset:"5:23"},"2026-01-05":{sunrise:"8:00",sunset:"5:23"},"2026-01-06":{sunrise:"8:00",sunset:"5:24"},"2026-01-07":{sunrise:"8:00",sunset:"5:25"},"2026-01-08":{sunrise:"8:00",sunset:"5:26"},"2026-01-09":{sunrise:"8:00",sunset:"5:27"},"2026-01-10":{sunrise:"8:00",sunset:"5:28"},"2026-01-11":{sunrise:"7:59",sunset:"5:29"},"2026-01-12":{sunrise:"7:59",sunset:"5:31"},"2026-01-13":{sunrise:"7:59",sunset:"5:32"},"2026-01-14":{sunrise:"7:58",sunset:"5:33"},"2026-01-15":{sunrise:"7:58",sunset:"5:34"},"2026-01-16":{sunrise:"7:58",sunset:"5:35"},"2026-01-17":{sunrise:"7:57",sunset:"5:36"},"2026-01-18":{sunrise:"7:57",sunset:"5:37"},"2026-01-19":{sunrise:"7:56",sunset:"5:38"},"2026-01-20":{sunrise:"7:56",sunset:"5:40"},"2026-01-21":{sunrise:"7:55",sunset:"5:41"},"2026-01-22":{sunrise:"7:54",sunset:"5:42"},"2026-01-23":{sunrise:"7:54",sunset:"5:43"},"2026-01-24":{sunrise:"7:53",sunset:"5:44"},"2026-01-25":{sunrise:"7:52",sunset:"5:46"},"2026-01-26":{sunrise:"7:51",sunset:"5:47"},"2026-01-27":{sunrise:"7:51",sunset:"5:48"},"2026-01-28":{sunrise:"7:50",sunset:"5:49"},"2026-01-29":{sunrise:"7:49",sunset:"5:51"},"2026-01-30":{sunrise:"7:48",sunset:"5:52"},"2026-01-31":{sunrise:"7:47",sunset:"5:53"},"2026-02-01":{sunrise:"7:46",sunset:"5:54"},"2026-02-02":{sunrise:"7:45",sunset:"5:55"},"2026-02-03":{sunrise:"7:44",sunset:"5:57"},"2026-02-04":{sunrise:"7:43",sunset:"5:58"},"2026-02-05":{sunrise:"7:42",sunset:"5:59"},"2026-02-06":{sunrise:"7:41",sunset:"6:00"},"2026-02-07":{sunrise:"7:40",sunset:"6:02"},"2026-02-08":{sunrise:"7:39",sunset:"6:03"},"2026-02-09":{sunrise:"7:37",sunset:"6:04"},"2026-02-10":{sunrise:"7:36",sunset:"6:05"},"2026-02-11":{sunrise:"7:35",sunset:"6:06"},"2026-02-12":{sunrise:"7:34",sunset:"6:08"},"2026-02-13":{sunrise:"7:33",sunset:"6:09"},"2026-02-14":{sunrise:"7:31",sunset:"6:10"},"2026-02-15":{sunrise:"7:30",sunset:"6:11"},"2026-02-16":{sunrise:"7:29",sunset:"6:13"},"2026-02-17":{sunrise:"7:27",sunset:"6:14"},"2026-02-18":{sunrise:"7:26",sunset:"6:15"},"2026-02-19":{sunrise:"7:25",sunset:"6:16"},"2026-02-20":{sunrise:"7:23",sunset:"6:17"},"2026-02-21":{sunrise:"7:22",sunset:"6:18"},"2026-02-22":{sunrise:"7:20",sunset:"6:20"},"2026-02-23":{sunrise:"7:19",sunset:"6:21"},"2026-02-24":{sunrise:"7:17",sunset:"6:22"},"2026-02-25":{sunrise:"7:16",sunset:"6:23"},"2026-02-26":{sunrise:"7:15",sunset:"6:24"},"2026-02-27":{sunrise:"7:13",sunset:"6:25"},"2026-02-28":{sunrise:"7:12",sunset:"6:27"}};
     
     // --- Global Variables ---
