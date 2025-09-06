@@ -7,9 +7,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1B1B1B; min-height: 100vh; color: #EAEAEA; overflow: hidden; } .main-container { display: flex; height: 100vh; } .map-section { flex: 1; position: relative; } #map { height: 100vh; width: 100%; } #search-input { position: absolute; top: 20px; left: 20px; right: 400px; padding: 15px 20px; font-size: 1rem; border: 2px solid #2C2C2E; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 10; background: #2C2C2E; color: #EAEAEA; transition: all 0.3s ease; } #search-input:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); } #search-input::placeholder { color: #999; } .controls-panel { width: 380px; background: #1B1B1B; border-left: 1px solid #2C2C2E; box-shadow: -5px 0 20px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow-y: auto; } .panel-header { background: #2C2C2E; padding: 25px; text-align: center; border-bottom: 1px solid #333; } .panel-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; color: #EAEAEA; } .panel-header p { font-size: 0.9rem; opacity: 0.8; color: #EAEAEA; } .panel-content { flex: 1; padding: 25px; overflow-y: auto; } .step-section { margin-bottom: 30px; background: #2C2C2E; border-radius: 8px; padding: 20px; border: 1px solid #333; } .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; } .step-number { background: #4CAF50; color: #1B1B1B; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; } .step-title { font-size: 1.2rem; font-weight: 600; color: #EAEAEA; } .form-group { margin-bottom: 18px; } .form-group label { display: block; font-weight: 600; color: #EAEAEA; margin-bottom: 8px; font-size: 0.95rem; } .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 1rem; transition: all 0.3s ease; background: #1B1B1B; color: #EAEAEA; } .form-group input:focus, .form-group select:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); } .form-group input[readonly] { background: #2C2C2E; color: #999; cursor: not-allowed; } .form-group input::placeholder { color: #666; } .help-text { font-size: 0.8rem; color: #999; margin-top: 4px; font-style: italic; } .game-type-selector { display: flex; gap: 10px; margin-bottom: 15px; } .game-type-btn { flex: 1; padding: 10px; border: 2px solid #333; border-radius: 6px; background: #1B1B1B; color: #EAEAEA; cursor: pointer; transition: all 0.3s ease; text-align: center; font-weight: 600; } .game-type-btn:hover { border-color: #4CAF50; } .game-type-btn.active { background: #4CAF50; color: #1B1B1B; border-color: #4CAF50; } .status-indicator { display: flex; align-items: center; gap: 8px; padding: 10px 15px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; margin-bottom: 15px; } .status-waiting { background: rgba(255, 191, 0, 0.1); color: #FFBF00; border: 1px solid rgba(255, 191, 0, 0.3); } .status-ready { background: rgba(76, 175, 80, 0.1); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.3); } .status-error { background: rgba(255, 87, 87, 0.1); color: #FF5757; border: 1px solid rgba(255, 87, 87, 0.3); } .status-calculating { background: rgba(255, 191, 0, 0.1); color: #FFBF00; border: 1px solid rgba(255, 191, 0, 0.3); } .btn { background: #4CAF50; color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px; } .btn:hover:not(:disabled) { background: #45A049; transform: translateY(-1px); } .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; } .route-options { display: none; margin-top: 15px; } .route-options.show { display: block; animation: slideDown 0.3s ease; } .route-option { background: #1B1B1B; border: 2px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease; } .route-option:hover { border-color: #4CAF50; } .route-option.selected { border-color: #FFBF00; background: rgba(255, 191, 0, 0.1); } .route-summary { display: flex; justify-content: space-between; align-items: center; } .route-time { font-weight: bold; color: #4CAF50; font-size: 1.1rem; } .route-distance { color: #999; font-size: 0.9rem; } .route-description { margin-top: 5px; font-size: 0.8rem; color: #999; } .drive-time-adjuster { display: none; margin-top: 15px; background: #1B1B1B; padding: 15px; border-radius: 6px; border: 1px solid #333; } .drive-time-adjuster.show { display: block; } .time-adjuster-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; } .time-btn { background: #4CAF50; color: #1B1B1B; border: none; width: 35px; height: 35px; border-radius: 4px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; } .time-btn:hover { background: #45A049; } .time-display { flex: 1; text-align: center; font-size: 1.1rem; font-weight: bold; color: #FFBF00; } .results-section { margin-top: 20px; display: none; } .results-section.show { display: block; animation: slideUp 0.5s ease; } .timeline { background: #2C2C2E; border-radius: 6px; padding: 20px; margin-top: 15px; } .timeline-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #333; } .timeline-item:last-child { border-bottom: none; } .timeline-item.highlight { background: rgba(255, 191, 0, 0.1); border-radius: 6px; padding: 15px 12px; margin: 5px 0; border: 1px solid rgba(255, 191, 0, 0.3); } .timeline-label { font-weight: 500; color: #EAEAEA; } .timeline-time { font-size: 1.2rem; font-weight: bold; color: #4CAF50; } .copy-section { margin-top: 20px; text-align: center; } .btn-copy { background: #2C2C2E; color: #EAEAEA; border: 2px solid #4CAF50; } .btn-copy:hover:not(:disabled) { background: #4CAF50; color: #1B1B1B; } .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(234, 234, 234, 0.3); border-radius: 50%; border-top-color: #EAEAEA; animation: spin 1s ease-in-out infinite; margin-left: 8px; } @keyframes spin { to { transform: rotate(360deg); } } @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 300px; } } @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; font-size: 0.85rem; } .info-item { background: #1B1B1B; padding: 10px; border-radius: 6px; border-left: 3px solid #4CAF50; } .info-label { font-weight: 600; color: #EAEAEA; margin-bottom: 3px; } .info-value { color: #999; }
         .mobile-toggle {
-            display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #4CAF50; color: #1B1B1B; border: none; width: 56px; height: 56px; border-radius: 50%; font-size: 1.8rem; line-height: 56px; text-align: center; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1002; background: #4CAF50; color: #1B1B1B; border: none; width: 56px; height: 56px; border-radius: 50%; font-size: 1.8rem; line-height: 56px; text-align: center; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        @media (max-width: 768px) { .main-container { flex-direction: column; position: relative; } .map-section { height: 100vh; width: 100%; position: relative; } .controls-panel { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: 70vh; transform: translateY(100%); transition: transform 0.3s ease; z-index: 999; border-radius: 20px 20px 0 0; } .controls-panel.show { transform: translateY(0); } .mobile-toggle { display: block; } #search-input { right: 20px; top: 10px; left: 10px; padding: 12px 15px; } .panel-content { padding: 15px; } .step-section { padding: 15px; margin-bottom: 20px; } .info-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .main-container { flex-direction: column; position: relative; } .map-section { height: 100%; width: 100%; position: absolute; } .controls-panel { position: fixed; bottom: 0; left: 0; width: 100%; height: 70vh; transform: translateY(100%); transition: transform 0.3s ease-in-out; z-index: 1000; border-radius: 20px 20px 0 0; } .controls-panel.show { transform: translateY(0); } .mobile-toggle { display: block; } #search-input { right: 20px; top: 10px; left: 10px; padding: 12px 15px; } .panel-content { padding: 15px; } .step-section { padding: 15px; margin-bottom: 20px; } .info-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -17,46 +17,18 @@
     <div class="map-section">
         <input type="text" id="search-input" placeholder="Search for your hunting location...">
         <div id="map"></div>
-        <button class="mobile-toggle" id="mobileToggle">^</button>
     </div>
     <div class="controls-panel" id="controlsPanel">
-        <div class="panel-header">
-            <h1>Hunt Planner</h1>
-            <p>Legal shooting times & timeline calculator</p>
-        </div>
+        <div class="panel-header"> <h1>Hunt Planner</h1> <p>Legal shooting times & timeline calculator</p> </div>
         <div class="panel-content">
-            <div class="step-section">
-                <div class="step-header"> <div class="step-number">1</div> <div class="step-title">Hunt Details</div> </div>
-                <div class="form-group"> <label for="huntDate">When are you hunting?</label> <input type="date" id="huntDate" min="2025-09-01" max="2026-02-28"> </div>
-                <label style="margin-bottom: 10px; display: block;">What are you hunting?</label>
-                <div class="game-type-selector"> <div class="game-type-btn active" data-type="deer">Deer</div> <div class="game-type-btn" data-type="waterfowl">Waterfowl</div> </div>
-            </div>
-            <div class="step-section">
-                <div class="step-header"> <div class="step-number">2</div> <div class="step-title">Hunting Location</div> </div>
-                <div id="locationStatus" class="status-indicator status-waiting"> Click on the map or search to set location </div>
-                <div class="form-group"> <label for="latLngInput">Coordinates (optional)</label> <input type="text" id="latLngInput" placeholder="40.3070, -96.4710"> </div>
-            </div>
-            <div class="step-section">
-                <div class="step-header"> <div class="step-number">3</div> <div class="step-title">Drive Time</div> </div>
-                <div id="driveTimeStatus" class="status-indicator status-waiting">Allow location access to calculate drive time.</div>
-                <div class="form-group"> <label for="driveTime">Calculated Drive Time</label> <input type="number" id="driveTime" min="0" value="0" readonly> </div>
-                <div id="routeOptions" class="route-options"> <label style="margin-bottom: 10px; display: block;">Choose Your Route:</label> <div id="routesList"></div> </div>
-                <div id="driveTimeAdjuster" class="drive-time-adjuster"> <label>Adjust Drive Time:</label> <div class="help-text">Add extra time for stops, fuel, etc.</div> <div class="time-adjuster-controls"> <button type="button" class="time-btn" onclick="adjustDriveTime(-5)">-5</button> <button type="button" class="time-btn" onclick="adjustDriveTime(-1)">-1</button> <div class="time-display"> <span id="adjustedTime">0</span> min </div> <button type="button" class="time-btn" onclick="adjustDriveTime(1)">+1</button> <button type="button" class="time-btn" onclick="adjustDriveTime(5)">+5</button> </div> </div>
-            </div>
-            <div class="step-section">
-                <div class="step-header"> <div class="step-number">4</div> <div class="step-title">Setup Details</div> </div>
-                <div class="form-group"> <label for="parkToSetTime">Walking Time (minutes)</label> <input type="number" id="parkToSetTime" min="0" value="10"> </div>
-                <div class="form-group"> <label for="setToEstablishTime">Setup Time (minutes)</label> <input type="number" id="setToEstablishTime" min="0" value="20"> </div>
-                <div class="form-group"> <label for="bufferTime">Buffer Time (minutes)</label> <input type="number" id="bufferTime" min="0" value="15"> </div>
-                <button id="calculateButton" class="btn" disabled> <span id="buttonText">Set Date & Location First</span> <span id="buttonSpinner" class="loading-spinner" style="display: none;"></span> </button>
-            </div>
-            <div id="resultsSection" class="results-section">
-                <div class="step-header"> <div class="step-number">✓</div> <div class="step-title">Your Timeline</div> </div>
-                <div id="resultsContent"></div>
-                <div class="copy-section"> <button id="copyButton" class="btn btn-copy"> Copy Plan to Share </button> </div>
-            </div>
+            <div class="step-section"> <div class="step-header"> <div class="step-number">1</div> <div class="step-title">Hunt Details</div> </div> <div class="form-group"> <label for="huntDate">When are you hunting?</label> <input type="date" id="huntDate"> </div> <label style="margin-bottom: 10px; display: block;">What are you hunting?</label> <div class="game-type-selector"> <div class="game-type-btn active" data-type="deer">Deer</div> <div class="game-type-btn" data-type="waterfowl">Waterfowl</div> </div> </div>
+            <div class="step-section"> <div class="step-header"> <div class="step-number">2</div> <div class="step-title">Hunting Location</div> </div> <div id="locationStatus" class="status-indicator status-waiting"> Click on the map or search to set location </div> <div class="form-group"> <label for="latLngInput">Coordinates (optional)</label> <input type="text" id="latLngInput" placeholder="40.3070, -96.4710"> </div> </div>
+            <div class="step-section"> <div class="step-header"> <div class="step-number">3</div> <div class="step-title">Drive Time</div> </div> <div id="driveTimeStatus" class="status-indicator status-waiting">Allow location access to calculate drive time.</div> <div class="form-group"> <label for="driveTime">Calculated Drive Time</label> <input type="number" id="driveTime" min="0" value="0" readonly> </div> <div id="routeOptions" class="route-options"> <label style="margin-bottom: 10px; display: block;">Choose Your Route:</label> <div id="routesList"></div> </div> <div id="driveTimeAdjuster" class="drive-time-adjuster"> <label>Adjust Drive Time:</label> <div class="help-text">Add extra time for stops, fuel, etc.</div> <div class="time-adjuster-controls"> <button type="button" class="time-btn" onclick="adjustDriveTime(-5)">-5</button> <button type="button" class="time-btn" onclick="adjustDriveTime(-1)">-1</button> <div class="time-display"> <span id="adjustedTime">0</span> min </div> <button type="button" class="time-btn" onclick="adjustDriveTime(1)">+1</button> <button type="button" class="time-btn" onclick="adjustDriveTime(5)">+5</button> </div> </div> </div>
+            <div class="step-section"> <div class="step-header"> <div class="step-number">4</div> <div class="step-title">Setup Details</div> </div> <div class="form-group"> <label for="parkToSetTime">Walking Time (minutes)</label> <input type="number" id="parkToSetTime" min="0" value="10"> </div> <div class="form-group"> <label for="setToEstablishTime">Setup Time (minutes)</label> <input type="number" id="setToEstablishTime" min="0" value="20"> </div> <div class="form-group"> <label for="bufferTime">Buffer Time (minutes)</label> <input type="number" id="bufferTime" min="0" value="15"> </div> <button id="calculateButton" class="btn" disabled> <span id="buttonText">Set Date & Location First</span> <span id="buttonSpinner" class="loading-spinner" style="display: none;"></span> </button> </div>
+            <div id="resultsSection" class="results-section"> <div class="step-header"> <div class="step-number">✓</div> <div class="step-title">Your Timeline</div> </div> <div id="resultsContent"></div> <div class="copy-section"> <button id="copyButton" class="btn btn-copy"> Copy Plan to Share </button> </div> </div>
         </div>
     </div>
+    <button class="mobile-toggle" id="mobileToggle">^</button>
 </div>
 
 <script>
@@ -73,29 +45,36 @@
     let fullDirectionsResponse = null;
 
     function initMap() {
-        const defaultLocation = { lat: 41.5, lng: -99.5 }; // Center of Nebraska
+        const defaultLocation = { lat: 41.5, lng: -99.5 };
         map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 7,
-            center: defaultLocation,
-            mapTypeId: 'hybrid',
-            gestureHandling: 'greedy',
+            zoom: 7, center: defaultLocation, mapTypeId: 'hybrid', gestureHandling: 'greedy',
             restriction: { latLngBounds: { north: 43.0, south: 40.0, west: -104.05, east: -95.3 }, strictBounds: false },
-            mapTypeControl: true, streetViewControl: false, zoomControl: true, scaleControl: true, rotateControl: false, fullscreenControl: true
+            mapTypeControl: true, streetViewControl: false, zoomControl: true, scaleControl: true, rotateControl: false, fullscreenControl: true,
+            // Add a dedicated button for "My Location"
+            mapTypeControlOptions: {
+                style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                position: google.maps.ControlPosition.TOP_RIGHT,
+            },
         });
 
-        directionsRenderer = new google.maps.DirectionsRenderer({
-             suppressMarkers: true,
-             polylineOptions: {
-                strokeColor: '#4CAF50',
-                strokeWeight: 8,
-                strokeOpacity: 0.9
-             }
+        // --- My Location Button ---
+        const locationButton = document.createElement("button");
+        locationButton.textContent = "My Location";
+        locationButton.classList.add("custom-map-control-button"); // You can style this
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(locationButton);
+        locationButton.addEventListener("click", () => {
+            if (startLocation) {
+                map.setCenter(startLocation);
+                map.setZoom(10);
+            } else {
+                alert("Location not available. Please allow location access.");
+            }
         });
+
+        directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true, polylineOptions: { strokeColor: '#4CAF50', strokeWeight: 8, strokeOpacity: 0.9 } });
         directionsRenderer.setMap(map);
-
         infoWindow = new google.maps.InfoWindow();
         directionsService = new google.maps.DirectionsService();
-
         const searchInput = document.getElementById("search-input");
         const searchBox = new google.maps.places.SearchBox(searchInput);
         map.addListener("bounds_changed", () => searchBox.setBounds(map.getBounds()));
@@ -107,40 +86,25 @@
         document.getElementById('latLngInput').addEventListener('change', handleLatLngInput);
         document.getElementById('huntDate').addEventListener('change', updateCalculateButton);
         document.getElementById('calculateButton').addEventListener('click', calculateTimeline);
-        
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const userCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
                     startLocation = userCoords;
-                    
                     startLocationMarker = new google.maps.Marker({
                         position: startLocation, map: map, title: "Your Start Location",
                         icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#4CAF50", fillOpacity: 1, strokeWeight: 2, strokeColor: "#ffffff" },
                     });
-
-                    if (isInNebraska(userCoords)) {
-                        map.setCenter(userCoords);
-                        map.setZoom(10); // FIX: Zoom in on user's location
-                    }
+                    if (isInNebraska(userCoords)) { map.setCenter(userCoords); map.setZoom(10); }
                     updateDriveTimeStatus('Your location found. Select a hunting spot.', 'ready');
                 },
-                () => {
-                    updateDriveTimeStatus('Could not get your location. Route calculation disabled.', 'error');
-                }
+                () => { updateDriveTimeStatus('Could not get your location. Route calculation disabled.', 'error'); }
             );
         } else {
             updateDriveTimeStatus('Geolocation is not supported by your browser.', 'error');
         }
     }
-
-    function handleLatLngInput() {
-        const coords = this.value.trim().split(',').map(c => parseFloat(c.trim()));
-        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-            placeMarker(new google.maps.LatLng(coords[0], coords[1]));
-        }
-    }
-    
+    function handleLatLngInput() { const coords = this.value.trim().split(',').map(c => parseFloat(c.trim())); if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) { placeMarker(new google.maps.LatLng(coords[0], coords[1])); } }
     function placeMarker(location) {
         updateLatLngInput(location);
         isLocationSet = true;
@@ -152,148 +116,18 @@
             currentMarker.addListener('dragend', (e) => placeMarker(e.latLng));
         }
         calculateAndDisplayRoute(location);
-    }
-    
-    function calculateAndDisplayRoute(destination) {
-        if (!startLocation) {
-            updateLocationStatus("Cannot calculate route without a start location.", "error");
-            return;
-        }
-        updateLocationStatus("Calculating route...", "calculating");
-        clearRoutes();
-
-        directionsService.route({
-            origin: startLocation,
-            destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING,
-            provideRouteAlternatives: true
-        }, (response, status) => {
-            if (status === "OK") {
-                fullDirectionsResponse = response;
-                directionsRenderer.setDirections(response);
-                showRouteOptions(response.routes);
-                updateLocationStatus(`${response.routes.length} route(s) found.`, "ready");
-            } else {
-                updateLocationStatus('Could not calculate drive time. Check API key.', 'error');
-            }
-        });
-    }
-
-    function showRouteOptions(routes) {
-        const routesList = document.getElementById('routesList');
-        routesList.innerHTML = '';
-        
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-        for (let i = 1; i < routes.length; i++) {
-            const polyline = new google.maps.Polyline({
-                path: routes[i].overview_path, strokeColor: '#888888', strokeOpacity: 0.6, strokeWeight: 6, map: map
-            });
-            alternateRoutePolylines.push(polyline);
-        }
-        
-        routes.forEach((route, index) => {
-            const routeDiv = document.createElement('div');
-            routeDiv.className = 'route-option';
-            if (index === 0) routeDiv.classList.add('selected');
-            const duration = Math.round(route.legs[0].duration.value / 60);
-            const distance = route.legs[0].distance.text;
-            const summary = route.summary || 'Main route';
-            routeDiv.innerHTML = `<div class="route-summary"><div class="route-time">${duration} min</div><div class="route-distance">${distance}</div></div><div class="route-description">via ${summary}</div>`;
-            routeDiv.addEventListener('click', () => {
-                selectRoute(index);
-                document.querySelectorAll('.route-option').forEach(r => r.classList.remove('selected'));
-                routeDiv.classList.add('selected');
-            });
-            routesList.appendChild(routeDiv);
-        });
-
-        if (routes.length > 0) {
-            updateDriveTime(routes[0]);
-            document.getElementById('routeOptions').classList.add('show');
-            document.getElementById('driveTimeAdjuster').classList.add('show');
+        if (window.innerWidth <= 768) {
+            document.getElementById('controlsPanel').classList.add('show');
+            document.getElementById('mobileToggle').textContent = 'v';
         }
     }
-
-    function selectRoute(index) {
-        directionsRenderer.setRouteIndex(index);
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-        for (let i = 0; i < fullDirectionsResponse.routes.length; i++) {
-            if (i !== index) {
-                const polyline = new google.maps.Polyline({
-                    path: fullDirectionsResponse.routes[i].overview_path, strokeColor: '#888888', strokeOpacity: 0.6, strokeWeight: 6, map: map
-                });
-                alternateRoutePolylines.push(polyline);
-            }
-        }
-        updateDriveTime(fullDirectionsResponse.routes[index]);
-    }
-    
-    function updateDriveTime(route) {
-        baseDriveTime = Math.round(route.legs[0].duration.value / 60);
-        driveTimeAdjustment = 0;
-        document.getElementById('driveTime').value = baseDriveTime;
-        document.getElementById('adjustedTime').textContent = baseDriveTime;
-    }
-    
-    function clearRoutes() {
-        if (directionsRenderer) directionsRenderer.setDirections({routes: []});
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-        document.getElementById('routeOptions').classList.remove('show');
-        document.getElementById('driveTimeAdjuster').classList.remove('show');
-    }
-
-    function formatTimeAMPM(time24) {
-        if (!time24) return '';
-        const [hours, minutes] = time24.split(':');
-        const h = parseInt(hours, 10);
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const h12 = h % 12 || 12; // Convert 0 to 12
-        return `${h12}:${minutes} ${ampm}`;
-    }
-
-    function calculateTimeline() {
-        const button = document.getElementById('calculateButton'), buttonText = document.getElementById('buttonText'), spinner = document.getElementById('buttonSpinner');
-        button.disabled = true; buttonText.textContent = 'Calculating...'; spinner.style.display = 'inline-block';
-        
-        setTimeout(() => {
-            const huntDateInput = document.getElementById('huntDate').value;
-            if (!huntDateInput || !sunData[huntDateInput] || !window.huntLocation) {
-                resetButton();
-                return;
-            }
-            const sunInfo = sunData[huntDateInput];
-            const timeAdjustmentMinutes = Math.round((window.huntLocation.lng - -99.084254) * 4);
-            const adjustedSunrise = adjustTime(sunInfo.sunrise, timeAdjustmentMinutes);
-            const legalShootingTime = adjustTime(adjustedSunrise, -30);
-            const adjustedSunset = adjustTime(sunInfo.sunset, timeAdjustmentMinutes);
-            let endLegalShooting = (selectedGameType === 'deer') ? adjustTime(adjustedSunset, 30) : adjustedSunset;
-            const driveTime = parseInt(document.getElementById('driveTime').value) || 0;
-            const bufferTime = parseInt(document.getElementById('bufferTime').value) || 0;
-            const parkToSetTime = parseInt(document.getElementById('parkToSetTime').value) || 0;
-            const setToEstablishTime = parseInt(document.getElementById('setToEstablishTime').value) || 0;
-            const establishedBy = adjustTime(legalShootingTime, -bufferTime);
-            const setBy = adjustTime(establishedBy, -setToEstablishTime);
-            const parkedBy = adjustTime(setBy, -parkToSetTime);
-            const leaveBy = adjustTime(parkedBy, -driveTime);
-            
-            // FIX: Use formatTimeAMPM for all displayed times
-            document.getElementById('resultsContent').innerHTML = `<div class="timeline"><div class="timeline-item highlight"><div class="timeline-label">Leave By</div><div class="timeline-time">${formatTimeAMPM(leaveBy)}</div></div><div class="timeline-item"><div class="timeline-label">Parked By</div><div class="timeline-time">${formatTimeAMPM(parkedBy)}</div></div><div class="timeline-item"><div class="timeline-label">At Stand/Blind</div><div class="timeline-time">${formatTimeAMPM(setBy)}</div></div><div class="timeline-item"><div class="timeline-label">Established By</div><div class="timeline-time">${formatTimeAMPM(establishedBy)}</div></div><div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Begins</div><div class="timeline-time">${formatTimeAMPM(legalShootingTime)}</div></div><div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Ends</div><div class="timeline-time">${formatTimeAMPM(endLegalShooting)}</div></div></div><div class="info-grid"><div class="info-item"><div class="info-label">Chart Sunrise</div><div class="info-value">${formatTimeAMPM(sunInfo.sunrise)}</div></div><div class="info-item"><div class="info-label">Chart Sunset</div><div class="info-value">${formatTimeAMPM(sunInfo.sunset)}</div></div><div class="info-item"><div class="info-label">Adjusted Sunrise</div><div class="info-value">${formatTimeAMPM(adjustedSunrise)}</div></div><div class="info-item"><div class="info-label">Adjusted Sunset</div><div class="info-value">${formatTimeAMPM(adjustedSunset)}</div></div><div class="info-item"><div class="info-label">Game Type</div><div class="info-value">${selectedGameType === 'deer' ? 'Deer' : 'Waterfowl'}</div></div><div class="info-item"><div class="info-label">Drive Time</div><div class="info-value">${driveTime} minutes</div></div></div>`;
-            
-            const resultsSection = document.getElementById('resultsSection');
-            resultsSection.classList.add('show');
-            if (window.innerWidth <= 768) { resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-            
-            const copyText = `Hunt Plan for ${huntDateInput} (${selectedGameType}):\n\nLeave by: ${formatTimeAMPM(leaveBy)}\nParked by: ${formatTimeAMPM(parkedBy)}\nAt stand/blind: ${formatTimeAMPM(setBy)}\nEstablished: ${formatTimeAMPM(establishedBy)}\n\nLegal Shooting Time: ${formatTimeAMPM(legalShootingTime)} - ${formatTimeAMPM(endLegalShooting)}\n\nDrive: ${driveTime}m, Walk: ${parkToSetTime}m, Setup: ${setToEstablishTime}m`;
-            document.getElementById('copyButton').onclick = function() { navigator.clipboard.writeText(copyText).then(() => { const btn = this; const originalText = btn.innerHTML; btn.innerHTML = 'Copied!'; setTimeout(() => { btn.innerHTML = originalText; }, 2000); }); };
-            
-            resetButton();
-        }, 50);
-    }
-    
-    // --- Utility Functions ---
+    function calculateAndDisplayRoute(destination) { if (!startLocation) { updateLocationStatus("Cannot calculate route without a start location.", "error"); return; } updateLocationStatus("Calculating route...", "calculating"); clearRoutes(); directionsService.route({ origin: startLocation, destination: destination, travelMode: google.maps.TravelMode.DRIVING, provideRouteAlternatives: true }, (response, status) => { if (status === "OK") { fullDirectionsResponse = response; directionsRenderer.setDirections(response); showRouteOptions(response.routes); updateLocationStatus(`${response.routes.length} route(s) found.`, "ready"); } else { updateLocationStatus('Could not calculate drive time. Check API key.', 'error'); } }); }
+    function showRouteOptions(routes) { const routesList = document.getElementById('routesList'); routesList.innerHTML = ''; alternateRoutePolylines.forEach(p => p.setMap(null)); alternateRoutePolylines = []; for (let i = 1; i < routes.length; i++) { const polyline = new google.maps.Polyline({ path: routes[i].overview_path, strokeColor: '#888888', strokeOpacity: 0.6, strokeWeight: 6, map: map }); alternateRoutePolylines.push(polyline); } routes.forEach((route, index) => { const routeDiv = document.createElement('div'); routeDiv.className = 'route-option'; if (index === 0) routeDiv.classList.add('selected'); const duration = Math.round(route.legs[0].duration.value / 60); const distance = route.legs[0].distance.text; const summary = route.summary || 'Main route'; routeDiv.innerHTML = `<div class="route-summary"><div class="route-time">${duration} min</div><div class="route-distance">${distance}</div></div><div class="route-description">via ${summary}</div>`; routeDiv.addEventListener('click', () => { selectRoute(index); document.querySelectorAll('.route-option').forEach(r => r.classList.remove('selected')); routeDiv.classList.add('selected'); }); routesList.appendChild(routeDiv); }); if (routes.length > 0) { updateDriveTime(routes[0]); document.getElementById('routeOptions').classList.add('show'); document.getElementById('driveTimeAdjuster').classList.add('show'); } }
+    function selectRoute(index) { directionsRenderer.setRouteIndex(index); alternateRoutePolylines.forEach(p => p.setMap(null)); alternateRoutePolylines = []; for (let i = 0; i < fullDirectionsResponse.routes.length; i++) { if (i !== index) { const polyline = new google.maps.Polyline({ path: fullDirectionsResponse.routes[i].overview_path, strokeColor: '#888888', strokeOpacity: 0.6, strokeWeight: 6, map: map }); alternateRoutePolylines.push(polyline); } } updateDriveTime(fullDirectionsResponse.routes[index]); }
+    function updateDriveTime(route) { baseDriveTime = Math.round(route.legs[0].duration.value / 60); driveTimeAdjustment = 0; document.getElementById('driveTime').value = baseDriveTime; document.getElementById('adjustedTime').textContent = baseDriveTime; }
+    function clearRoutes() { if (directionsRenderer) directionsRenderer.setDirections({routes: []}); alternateRoutePolylines.forEach(p => p.setMap(null)); alternateRoutePolylines = []; document.getElementById('routeOptions').classList.remove('show'); document.getElementById('driveTimeAdjuster').classList.remove('show'); }
+    function formatTimeAMPM(time24) { if (!time24) return ''; const [hours, minutes] = time24.split(':'); let h = parseInt(hours, 10); const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${minutes.padStart(2, '0')} ${ampm}`; }
+    function calculateTimeline() { const button = document.getElementById('calculateButton'), buttonText = document.getElementById('buttonText'), spinner = document.getElementById('buttonSpinner'); button.disabled = true; buttonText.textContent = 'Calculating...'; spinner.style.display = 'inline-block'; setTimeout(() => { const huntDateInput = document.getElementById('huntDate').value; if (!huntDateInput || !sunData[huntDateInput] || !window.huntLocation) { resetButton(); return; } const sunInfo = sunData[huntDateInput]; let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number); if (sunsetHour < 12) sunsetHour += 12; const correctedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`; const timeAdjustmentMinutes = Math.round((window.huntLocation.lng - -99.084254) * 4); const adjustedSunrise = adjustTime(sunInfo.sunrise, timeAdjustmentMinutes), legalShootingTime = adjustTime(adjustedSunrise, -30); const adjustedSunset = adjustTime(correctedSunset, timeAdjustmentMinutes); let endLegalShooting = (selectedGameType === 'deer') ? adjustTime(adjustedSunset, 30) : adjustedSunset; const driveTime = parseInt(document.getElementById('driveTime').value) || 0, bufferTime = parseInt(document.getElementById('bufferTime').value) || 0, parkToSetTime = parseInt(document.getElementById('parkToSetTime').value) || 0, setToEstablishTime = parseInt(document.getElementById('setToEstablishTime').value) || 0; const establishedBy = adjustTime(legalShootingTime, -bufferTime), setBy = adjustTime(establishedBy, -setToEstablishTime), parkedBy = adjustTime(setBy, -parkToSetTime), leaveBy = adjustTime(parkedBy, -driveTime); document.getElementById('resultsContent').innerHTML = `<div class="timeline"><div class="timeline-item highlight"><div class="timeline-label">Leave By</div><div class="timeline-time">${formatTimeAMPM(leaveBy)}</div></div><div class="timeline-item"><div class="timeline-label">Parked By</div><div class="timeline-time">${formatTimeAMPM(parkedBy)}</div></div><div class="timeline-item"><div class="timeline-label">At Stand/Blind</div><div class="timeline-time">${formatTimeAMPM(setBy)}</div></div><div class="timeline-item"><div class="timeline-label">Established By</div><div class="timeline-time">${formatTimeAMPM(establishedBy)}</div></div><div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Begins</div><div class="timeline-time">${formatTimeAMPM(legalShootingTime)}</div></div><div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Ends</div><div class="timeline-time">${formatTimeAMPM(endLegalShooting)}</div></div></div><div class="info-grid"><div class="info-item"><div class="info-label">Chart Sunrise</div><div class="info-value">${formatTimeAMPM(sunInfo.sunrise)}</div></div><div class="info-item"><div class="info-label">Chart Sunset</div><div class="info-value">${formatTimeAMPM(correctedSunset)}</div></div><div class="info-item"><div class="info-label">Adjusted Sunrise</div><div class="info-value">${formatTimeAMPM(adjustedSunrise)}</div></div><div class="info-item"><div class="info-label">Adjusted Sunset</div><div class="info-value">${formatTimeAMPM(adjustedSunset)}</div></div><div class="info-item"><div class="info-label">Game Type</div><div class="info-value">${selectedGameType === 'deer' ? 'Deer' : 'Waterfowl'}</div></div><div class="info-item"><div class="info-label">Drive Time</div><div class="info-value">${driveTime} minutes</div></div></div>`; const resultsSection = document.getElementById('resultsSection'); resultsSection.classList.add('show'); if (window.innerWidth <= 768) { resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); } const copyText = `Hunt Plan for ${huntDateInput} (${selectedGameType}):\n\nLeave by: ${formatTimeAMPM(leaveBy)}\nParked by: ${formatTimeAMPM(parkedBy)}\nAt stand/blind: ${formatTimeAMPM(setBy)}\nEstablished: ${formatTimeAMPM(establishedBy)}\n\nLegal Shooting Time: ${formatTimeAMPM(legalShootingTime)} - ${formatTimeAMPM(endLegalShooting)}\n\nDrive: ${driveTime}m, Walk: ${parkToSetTime}m, Setup: ${setToEstablishTime}m`; document.getElementById('copyButton').onclick = function() { navigator.clipboard.writeText(copyText).then(() => { const btn = this; const originalText = btn.innerHTML; btn.innerHTML = 'Copied!'; setTimeout(() => { btn.innerHTML = originalText; }, 2000); }); }; resetButton(); }, 50); }
     function updateDriveTimeStatus(message, type) { const statusEl = document.getElementById('driveTimeStatus'); statusEl.className = `status-indicator status-${type}`; statusEl.textContent = message; }
     function isInNebraska(location) { const nebraskaBounds = { north: 43.0, south: 40.0, west: -104.05, east: -95.3 }; return (location.lat >= nebraskaBounds.south && location.lat <= nebraskaBounds.north && location.lng >= nebraskaBounds.west && location.lng <= nebraskaBounds.east); }
     function setupGameTypeSelector() { const gameTypeBtns = document.querySelectorAll('.game-type-btn'); gameTypeBtns.forEach(btn => { btn.addEventListener('click', function() { gameTypeBtns.forEach(b => b.classList.remove('active')); this.classList.add('active'); selectedGameType = this.dataset.type; }); }); }
