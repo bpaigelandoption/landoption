@@ -5,27 +5,9 @@
     <title>Hunting Planner</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1B1B1B; min-height: 100vh; color: #EAEAEA; overflow: hidden; } .main-container { display: flex; height: 100vh; } .map-section { flex: 1; position: relative; } #map { height: 100vh; width: 100%; } #search-input { position: absolute; top: 20px; left: 20px; right: 400px; padding: 15px 20px; font-size: 1rem; border: 2px solid #2C2C2E; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 10; background: #2C2C2E; color: #EAEAEA; transition: all 0.3s ease; } #search-input:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); } #search-input::placeholder { color: #999; } .controls-panel { width: 380px; background: #1B1B1B; border-left: 1px solid #2C2C2E; box-shadow: -5px 0 20px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow-y: auto; } .panel-header { background: #2C2C2E; padding: 25px; text-align: center; border-bottom: 1px solid #333; } .panel-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; color: #EAEAEA; } .panel-header p { font-size: 0.9rem; opacity: 0.8; color: #EAEAEA; } .panel-content { flex: 1; padding: 25px; overflow-y: auto; } .step-section { margin-bottom: 30px; background: #2C2C2E; border-radius: 8px; padding: 20px; border: 1px solid #333; } .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; } .step-number { background: #4CAF50; color: #1B1B1B; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; } .step-title { font-size: 1.2rem; font-weight: 600; color: #EAEAEA; } .form-group { margin-bottom: 18px; } .form-group label { display: block; font-weight: 600; color: #EAEAEA; margin-bottom: 8px; font-size: 0.95rem; } .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 1rem; transition: all 0.3s ease; background: #1B1B1B; color: #EAEAEA; } .form-group input:focus, .form-group select:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); } .form-group input[readonly] { background: #2C2C2E; color: #999; cursor: not-allowed; } .form-group input::placeholder { color: #666; } .help-text { font-size: 0.8rem; color: #999; margin-top: 4px; font-style: italic; } .game-type-selector { display: flex; gap: 10px; margin-bottom: 15px; } .game-type-btn { flex: 1; padding: 10px; border: 2px solid #333; border-radius: 6px; background: #1B1B1B; color: #EAEAEA; cursor: pointer; transition: all 0.3s ease; text-align: center; font-weight: 600; } .game-type-btn:hover { border-color: #4CAF50; } .game-type-btn.active { background: #4CAF50; color: #1B1B1B; border-color: #4CAF50; } .status-indicator { display: flex; align-items: center; gap: 8px; padding: 10px 15px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; margin-bottom: 15px; } .status-waiting { background: rgba(255, 191, 0, 0.1); color: #FFBF00; border: 1px solid rgba(255, 191, 0, 0.3); } .status-ready { background: rgba(76, 175, 80, 0.1); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.3); } .status-error { background: rgba(255, 87, 87, 0.1); color: #FF5757; border: 1px solid rgba(255, 87, 87, 0.3); } .status-calculating { background: rgba(255, 191, 0, 0.1); color: #FFBF00; border: 1px solid rgba(255, 191, 0, 0.3); } .btn { background: #4CAF50; color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px; } .btn:hover:not(:disabled) { background: #45A049; transform: translateY(-1px); } .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; } .btn-secondary { background: #2C2C2E; color: #EAEAEA; border: 2px solid #4CAF50; } .btn-secondary:hover:not(:disabled) { background: #4CAF50; color: #1B1B1B; } .btn-secondary.active { background: #FFBF00; color: #1B1B1B; border-color: #FFBF00; transform: none; } .route-options { display: none; margin-top: 15px; } .route-options.show { display: block; animation: slideDown 0.3s ease; } .route-option { background: #1B1B1B; border: 2px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease; } .route-option:hover { border-color: #4CAF50; } .route-option.selected { border-color: #FFBF00; background: rgba(255, 191, 0, 0.1); } .route-summary { display: flex; justify-content: space-between; align-items: center; } .route-time { font-weight: bold; color: #4CAF50; font-size: 1.1rem; } .route-distance { color: #999; font-size: 0.9rem; } .route-description { margin-top: 5px; font-size: 0.8rem; color: #999; } .drive-time-adjuster { display: none; margin-top: 15px; background: #1B1B1B; padding: 15px; border-radius: 6px; border: 1px solid #333; } .drive-time-adjuster.show { display: block; } .time-adjuster-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; } .time-btn { background: #4CAF50; color: #1B1B1B; border: none; width: 35px; height: 35px; border-radius: 4px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; } .time-btn:hover { background: #45A049; } .time-display { flex: 1; text-align: center; font-size: 1.1rem; font-weight: bold; color: #FFBF00; } .results-section { margin-top: 20px; display: none; } .results-section.show { display: block; animation: slideUp 0.5s ease; } .timeline { background: #2C2C2E; border-radius: 6px; padding: 20px; margin-top: 15px; } .timeline-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #333; } .timeline-item:last-child { border-bottom: none; } .timeline-item.highlight { background: rgba(255, 191, 0, 0.1); border-radius: 6px; padding: 15px 12px; margin: 5px 0; border: 1px solid rgba(255, 191, 0, 0.3); } .timeline-label { font-weight: 500; color: #EAEAEA; } .timeline-time { font-size: 1.2rem; font-weight: bold; color: #4CAF50; } .copy-section { margin-top: 20px; text-align: center; } .btn-copy { background: #2C2C2E; color: #EAEAEA; border: 2px solid #4CAF50; } .btn-copy:hover:not(:disabled) { background: #4CAF50; color: #1B1B1B; } .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(234, 234, 234, 0.3); border-radius: 50%; border-top-color: #EAEAEA; animation: spin 1s ease-in-out infinite; margin-left: 8px; } .input-with-button { display: flex; gap: 10px; align-items: center; } .input-with-button input { flex: 1; } .input-with-button button { flex-shrink: 0; padding: 0 20px; margin-top: 0; } @keyframes spin { to { transform: rotate(360deg); } } @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 300px; } } @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; font-size: 0.85rem; } .info-item { background: #1B1B1B; padding: 10px; border-radius: 6px; border-left: 3px solid #4CAF50; } .info-label { font-weight: 600; color: #EAEAEA; margin-bottom: 3px; } .info-value { color: #999; }
+        * { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1B1B1B; min-height: 100vh; color: #EAEAEA; overflow: hidden; } .main-container { display: flex; height: 100vh; } .map-section { flex: 1; position: relative; } #map { height: 100vh; width: 100%; } #search-input { position: absolute; top: 20px; left: 20px; right: 400px; padding: 15px 20px; font-size: 1rem; border: 2px solid #2C2C2E; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 10; background: #2C2C2E; color: #EAEAEA; transition: all 0.3s ease; } #search-input:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); } #search-input::placeholder { color: #999; } .controls-panel { width: 380px; background: #1B1B1B; border-left: 1px solid #2C2C2E; box-shadow: -5px 0 20px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow-y: auto; } .panel-header { background: #2C2C2E; padding: 25px; text-align: center; border-bottom: 1px solid #333; } .panel-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; color: #EAEAEA; } .panel-header p { font-size: 0.9rem; opacity: 0.8; color: #EAEAEA; } .panel-content { flex: 1; padding: 25px; overflow-y: auto; } .step-section { margin-bottom: 30px; background: #2C2C2E; border-radius: 8px; padding: 20px; border: 1px solid #333; } .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; } .step-number { background: #4CAF50; color: #1B1B1B; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; } .step-title { font-size: 1.2rem; font-weight: 600; color: #EAEAEA; } .form-group { margin-bottom: 18px; } .form-group label { display: block; font-weight: 600; color: #EAEAEA; margin-bottom: 8px; font-size: 0.95rem; } .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 1rem; transition: all 0.3s ease; background: #1B1B1B; color: #EAEAEA; } .form-group input:focus, .form-group select:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); } .form-group input[readonly] { background: #2C2C2E; color: #999; cursor: not-allowed; } .form-group input::placeholder { color: #666; } .help-text { font-size: 0.8rem; color: #999; margin-top: 4px; font-style: italic; } .game-type-selector { display: flex; gap: 10px; margin-bottom: 15px; } .game-type-btn { flex: 1; padding: 10px; border: 2px solid #333; border-radius: 6px; background: #1B1B1B; color: #EAEAEA; cursor: pointer; transition: all 0.3s ease; text-align: center; font-weight: 600; } .game-type-btn:hover { border-color: #4CAF50; } .game-type-btn.active { background: #4CAF50; color: #1B1B1B; border-color: #4CAF50; } .status-indicator { display: flex; align-items: center; gap: 8px; padding: 10px 15px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; margin-bottom: 15px; } .status-waiting { background: rgba(255, 191, 0, 0.1); color: #FFBF00; border: 1px solid rgba(255, 191, 0, 0.3); } .status-ready { background: rgba(76, 175, 80, 0.1); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.3); } .status-error { background: rgba(255, 87, 87, 0.1); color: #FF5757; border: 1px solid rgba(255, 87, 87, 0.3); } .status-calculating { background: rgba(255, 191, 0, 0.1); color: #FFBF00; border: 1px solid rgba(255, 191, 0, 0.3); } .btn { background: #4CAF50; color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px; } .btn:hover:not(:disabled) { background: #45A049; transform: translateY(-1px); } .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; } .route-options { display: none; margin-top: 15px; } .route-options.show { display: block; animation: slideDown 0.3s ease; } .route-option { background: #1B1B1B; border: 2px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease; } .route-option:hover { border-color: #4CAF50; } .route-option.selected { border-color: #FFBF00; background: rgba(255, 191, 0, 0.1); } .route-summary { display: flex; justify-content: space-between; align-items: center; } .route-time { font-weight: bold; color: #4CAF50; font-size: 1.1rem; } .route-distance { color: #999; font-size: 0.9rem; } .route-description { margin-top: 5px; font-size: 0.8rem; color: #999; } .drive-time-adjuster { display: none; margin-top: 15px; background: #1B1B1B; padding: 15px; border-radius: 6px; border: 1px solid #333; } .drive-time-adjuster.show { display: block; } .time-adjuster-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; } .time-btn { background: #4CAF50; color: #1B1B1B; border: none; width: 35px; height: 35px; border-radius: 4px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; } .time-btn:hover { background: #45A049; } .time-display { flex: 1; text-align: center; font-size: 1.1rem; font-weight: bold; color: #FFBF00; } .results-section { margin-top: 20px; display: none; } .results-section.show { display: block; animation: slideUp 0.5s ease; } .timeline { background: #2C2C2E; border-radius: 6px; padding: 20px; margin-top: 15px; } .timeline-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #333; } .timeline-item:last-child { border-bottom: none; } .timeline-item.highlight { background: rgba(255, 191, 0, 0.1); border-radius: 6px; padding: 15px 12px; margin: 5px 0; border: 1px solid rgba(255, 191, 0, 0.3); } .timeline-label { font-weight: 500; color: #EAEAEA; } .timeline-time { font-size: 1.2rem; font-weight: bold; color: #4CAF50; } .copy-section { margin-top: 20px; text-align: center; } .btn-copy { background: #2C2C2E; color: #EAEAEA; border: 2px solid #4CAF50; } .btn-copy:hover:not(:disabled) { background: #4CAF50; color: #1B1B1B; } .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(234, 234, 234, 0.3); border-radius: 50%; border-top-color: #EAEAEA; animation: spin 1s ease-in-out infinite; margin-left: 8px; } @keyframes spin { to { transform: rotate(360deg); } } @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 300px; } } @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; font-size: 0.85rem; } .info-item { background: #1B1B1B; padding: 10px; border-radius: 6px; border-left: 3px solid #4CAF50; } .info-label { font-weight: 600; color: #EAEAEA; margin-bottom: 3px; } .info-value { color: #999; }
         .mobile-toggle {
-            display: none;
-            position: absolute;
-            bottom: 20px;
-            /* FIX: Move to center to avoid conflict with Google UI */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background: #4CAF50;
-            color: #1B1B1B;
-            border: none;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            font-size: 1.8rem;
-            line-height: 56px;
-            text-align: center;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #4CAF50; color: #1B1B1B; border: none; width: 56px; height: 56px; border-radius: 50%; font-size: 1.8rem; line-height: 56px; text-align: center; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         @media (max-width: 768px) { .main-container { flex-direction: column; position: relative; } .map-section { height: 100vh; width: 100%; position: relative; } .controls-panel { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: 70vh; transform: translateY(100%); transition: transform 0.3s ease; z-index: 999; border-radius: 20px 20px 0 0; } .controls-panel.show { transform: translateY(0); } .mobile-toggle { display: block; } #search-input { right: 20px; top: 10px; left: 10px; padding: 12px 15px; } .panel-content { padding: 15px; } .step-section { padding: 15px; margin-bottom: 20px; } .info-grid { grid-template-columns: 1fr; } }
     </style>
@@ -56,22 +38,8 @@
             </div>
             <div class="step-section">
                 <div class="step-header"> <div class="step-number">3</div> <div class="step-title">Drive Time</div> </div>
-                <div id="startLocationStatus" class="status-indicator status-waiting"> Automatic location unavailable. Set your start point below. </div>
-                
-                <div class="form-group">
-                    <label>Set Your Start Point</label>
-                    <button id="setStartOnMapBtn" class="btn btn-secondary" style="width: 100%; margin-top: 0;">Set Start on Map</button>
-                </div>
-
-                <div class="form-group">
-                    <label for="startLocationInput">Or, Type Start Address</label>
-                    <div class="input-with-button">
-                        <input type="text" id="startLocationInput" placeholder="e.g., Lincoln, NE">
-                        <button id="setStartLocationBtn" class="btn">Set</button>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 25px;"> <label for="driveTime">Calculated Drive Time</label> <input type="number" id="driveTime" min="0" value="0" readonly> </div>
+                <div id="driveTimeStatus" class="status-indicator status-waiting">Allow location access to calculate drive time.</div>
+                <div class="form-group"> <label for="driveTime">Calculated Drive Time</label> <input type="number" id="driveTime" min="0" value="0" readonly> </div>
                 <div id="routeOptions" class="route-options"> <label style="margin-bottom: 10px; display: block;">Choose Your Route:</label> <div id="routesList"></div> </div>
                 <div id="driveTimeAdjuster" class="drive-time-adjuster"> <label>Adjust Drive Time:</label> <div class="help-text">Add extra time for stops, fuel, etc.</div> <div class="time-adjuster-controls"> <button type="button" class="time-btn" onclick="adjustDriveTime(-5)">-5</button> <button type="button" class="time-btn" onclick="adjustDriveTime(-1)">-1</button> <div class="time-display"> <span id="adjustedTime">0</span> min </div> <button type="button" class="time-btn" onclick="adjustDriveTime(1)">+1</button> <button type="button" class="time-btn" onclick="adjustDriveTime(5)">+5</button> </div> </div>
             </div>
@@ -94,18 +62,18 @@
 <script>
     const sunData={"2025-09-01":{sunrise:"7:04",sunset:"8:08"},"2025-09-02":{sunrise:"7:05",sunset:"8:06"},"2025-09-03":{sunrise:"7:06",sunset:"8:05"},"2025-09-04":{sunrise:"7:07",sunset:"8:03"},"2025-09-05":{sunrise:"7:08",sunset:"8:01"},"2025-09-06":{sunrise:"7:09",sunset:"8:00"},"2025-09-07":{sunrise:"7:10",sunset:"7:58"},"2025-09-08":{sunrise:"7:11",sunset:"7:56"},"2025-09-09":{sunrise:"7:12",sunset:"7:55"},"2025-09-10":{sunrise:"7:12",sunset:"7:53"},"2025-09-11":{sunrise:"7:13",sunset:"7:51"},"2025-09-12":{sunrise:"7:14",sunset:"7:50"},"2025-09-13":{sunrise:"7:15",sunset:"7:48"},"2025-09-14":{sunrise:"7:16",sunset:"7:46"},"2025-09-15":{sunrise:"7:17",sunset:"7:45"},"2025-09-16":{sunrise:"7:18",sunset:"7:43"},"2025-09-17":{sunrise:"7:19",sunset:"7:41"},"2025-09-18":{sunrise:"7:20",sunset:"7:40"},"2025-09-19":{sunrise:"7:21",sunset:"7:38"},"2025-09-20":{sunrise:"7:22",sunset:"7:36"},"2025-09-21":{sunrise:"7:23",sunset:"7:34"},"2025-09-22":{sunrise:"7:24",sunset:"7:33"},"2025-09-23":{sunrise:"7:25",sunset:"7:31"},"2025-09-24":{sunrise:"7:26",sunset:"7:29"},"2025-09-25":{sunrise:"7:27",sunset:"7:28"},"2025-09-26":{sunrise:"7:28",sunset:"7:26"},"2025-09-27":{sunrise:"7:29",sunset:"7:24"},"2025-09-28":{sunrise:"7:30",sunset:"7:23"},"2025-09-29":{sunrise:"7:31",sunset:"7:21"},"2025-09-30":{sunrise:"7:32",sunset:"7:19"},"2025-10-01":{sunrise:"7:33",sunset:"7:18"},"2025-10-02":{sunrise:"7:34",sunset:"7:16"},"2025-10-03":{sunrise:"7:35",sunset:"7:14"},"2025-10-04":{sunrise:"7:36",sunset:"7:13"},"2025-10-05":{sunrise:"7:37",sunset:"7:11"},"2025-10-06":{sunrise:"7:38",sunset:"7:10"},"2025-10-07":{sunrise:"7:39",sunset:"7:08"},"2025-10-08":{sunrise:"7:40",sunset:"7:06"},"2025-10-09":{sunrise:"7:42",sunset:"7:05"},"2025-10-10":{sunrise:"7:43",sunset:"7:03"},"2025-10-11":{sunrise:"7:44",sunset:"7:02"},"2025-10-12":{sunrise:"7:45",sunset:"7:00"},"2025-10-13":{sunrise:"7:46",sunset:"6:59"},"2025-10-14":{sunrise:"7:47",sunset:"6:57"},"2025-10-15":{sunrise:"7:48",sunset:"6:55"},"2025-10-16":{sunrise:"7:49",sunset:"6:54"},"2025-10-17":{sunrise:"7:50",sunset:"6:52"},"2025-10-18":{sunrise:"7:51",sunset:"6:51"},"2025-10-19":{sunrise:"7:52",sunset:"6:50"},"2025-10-20":{sunrise:"7:53",sunset:"6:48"},"2025-10-21":{sunrise:"7:55",sunset:"6:47"},"2025-10-22":{sunrise:"7:56",sunset:"6:45"},"2025-10-23":{sunrise:"7:57",sunset:"6:44"},"2025-10-24":{sunrise:"7:58",sunset:"6:42"},"2025-10-25":{sunrise:"7:59",sunset:"6:41"},"2025-10-26":{sunrise:"8:00",sunset:"6:40"},"2025-10-27":{sunrise:"8:01",sunset:"6:38"},"2025-10-28":{sunrise:"8:02",sunset:"6:37"},"2025-10-29":{sunrise:"8:04",sunset:"6:36"},"2025-10-30":{sunrise:"8:05",sunset:"6:35"},"2025-10-31":{sunrise:"8:06",sunset:"6:33"},"2025-11-01":{sunrise:"8:07",sunset:"6:32"},"2025-11-02":{sunrise:"7:08",sunset:"5:31"},"2025-11-03":{sunrise:"7:09",sunset:"5:30"},"2025-11-04":{sunrise:"7:11",sunset:"5:29"},"2025-11-05":{sunrise:"7:12",sunset:"5:28"},"2025-11-06":{sunrise:"7:13",sunset:"5:27"},"2025-11-07":{sunrise:"7:14",sunset:"5:25"},"2025-11-08":{sunrise:"7:15",sunset:"5:24"},"2025-11-09":{sunrise:"7:16",sunset:"5:23"},"2025-11-10":{sunrise:"7:18",sunset:"5:22"},"2025-11-11":{sunrise:"7:19",sunset:"5:21"},"2025-11-12":{sunrise:"7:20",sunset:"5:21"},"2025-11-13":{sunrise:"7:21",sunset:"5:20"},"2025-11-14":{sunrise:"7:22",sunset:"5:19"},"2025-11-15":{sunrise:"7:24",sunset:"5:18"},"2025-11-16":{sunrise:"7:25",sunset:"5:17"},"2025-11-17":{sunrise:"7:26",sunset:"5:16"},"2025-11-18":{sunrise:"7:27",sunset:"5:16"},"2025-11-19":{sunrise:"7:28",sunset:"5:15"},"2025-11-20":{sunrise:"7:29",sunset:"5:14"},"2025-11-21":{sunrise:"7:30",sunset:"5:14"},"2025-11-22":{sunrise:"7:32",sunset:"5:13"},"2025-11-23":{sunrise:"7:33",sunset:"5:13"},"2025-11-24":{sunrise:"7:34",sunset:"5:12"},"2025-11-25":{sunrise:"7:35",sunset:"5:12"},"2025-11-26":{sunrise:"7:36",sunset:"5:11"},"2025-11-27":{sunrise:"7:37",sunset:"5:11"},"2025-11-28":{sunrise:"7:38",sunset:"5:10"},"2025-11-29":{sunrise:"7:39",sunset:"5:10"},"2025-11-30":{sunrise:"7:40",sunset:"5:10"},"2025-12-01":{sunrise:"7:41",sunset:"5:10"},"2025-12-02":{sunrise:"7:42",sunset:"5:09"},"2025-12-03":{sunrise:"7:43",sunset:"5:09"},"2025-12-04":{sunrise:"7:44",sunset:"5:09"},"2025-12-05":{sunrise:"7:45",sunset:"5:09"},"2025-12-06":{sunrise:"7:46",sunset:"5:09"},"2025-12-07":{sunrise:"7:47",sunset:"5:09"},"2025-12-08":{sunrise:"7:48",sunset:"5:09"},"2025-12-09":{sunrise:"7:49",sunset:"5:09"},"2025-12-10":{sunrise:"7:50",sunset:"5:09"},"2025-12-11":{sunrise:"7:50",sunset:"5:09"},"2025-12-12":{sunrise:"7:51",sunset:"5:09"},"2025-12-13":{sunrise:"7:52",sunset:"5:09"},"2025-12-14":{sunrise:"7:53",sunset:"5:10"},"2025-12-15":{sunrise:"7:53",sunset:"5:10"},"2025-12-16":{sunrise:"7:54",sunset:"5:10"},"2025-12-17":{sunrise:"7:55",sunset:"5:11"},"2025-12-18":{sunrise:"7:55",sunset:"5:11"},"2025-12-19":{sunrise:"7:56",sunset:"5:11"},"2025-12-20":{sunrise:"7:56",sunset:"5:12"},"2025-12-21":{sunrise:"7:57",sunset:"5:12"},"2025-12-22":{sunrise:"7:57",sunset:"5:13"},"2025-12-23":{sunrise:"7:58",sunset:"5:13"},"2025-12-24":{sunrise:"7:58",sunset:"5:14"},"2025-12-25":{sunrise:"7:59",sunset:"5:15"},"2025-12-26":{sunrise:"7:59",sunset:"5:15"},"2025-12-27":{sunrise:"7:59",sunset:"5:16"},"2025-12-28":{sunrise:"8:00",sunset:"5:17"},"2025-12-29":{sunrise:"8:00",sunset:"5:17"},"2025-12-30":{sunrise:"8:00",sunset:"5:18"},"2025-12-31":{sunrise:"8:00",sunset:"5:19"},"2026-01-01":{sunrise:"8:00",sunset:"5:20"},"2026-01-02":{sunrise:"8:00",sunset:"5:21"},"2026-01-03":{sunrise:"8:00",sunset:"5:22"},"2026-01-04":{sunrise:"8:00",sunset:"5:23"},"2026-01-05":{sunrise:"8:00",sunset:"5:23"},"2026-01-06":{sunrise:"8:00",sunset:"5:24"},"2026-01-07":{sunrise:"8:00",sunset:"5:25"},"2026-01-08":{sunrise:"8:00",sunset:"5:26"},"2026-01-09":{sunrise:"8:00",sunset:"5:27"},"2026-01-10":{sunrise:"8:00",sunset:"5:28"},"2026-01-11":{sunrise:"7:59",sunset:"5:29"},"2026-01-12":{sunrise:"7:59",sunset:"5:31"},"2026-01-13":{sunrise:"7:59",sunset:"5:32"},"2026-01-14":{sunrise:"7:58",sunset:"5:33"},"2026-01-15":{sunrise:"7:58",sunset:"5:34"},"2026-01-16":{sunrise:"7:58",sunset:"5:35"},"2026-01-17":{sunrise:"7:57",sunset:"5:36"},"2026-01-18":{sunrise:"7:57",sunset:"5:37"},"2026-01-19":{sunrise:"7:56",sunset:"5:38"},"2026-01-20":{sunrise:"7:56",sunset:"5:40"},"2026-01-21":{sunrise:"7:55",sunset:"5:41"},"2026-01-22":{sunrise:"7:54",sunset:"5:42"},"2026-01-23":{sunrise:"7:54",sunset:"5:43"},"2026-01-24":{sunrise:"7:53",sunset:"5:44"},"2026-01-25":{sunrise:"7:52",sunset:"5:46"},"2026-01-26":{sunrise:"7:51",sunset:"5:47"},"2026-01-27":{sunrise:"7:51",sunset:"5:48"},"2026-01-28":{sunrise:"7:50",sunset:"5:49"},"2026-01-29":{sunrise:"7:49",sunset:"5:51"},"2026-01-30":{sunrise:"7:48",sunset:"5:52"},"2026-01-31":{sunrise:"7:47",sunset:"5:53"},"2026-02-01":{sunrise:"7:46",sunset:"5:54"},"2026-02-02":{sunrise:"7:45",sunset:"5:55"},"2026-02-03":{sunrise:"7:44",sunset:"5:57"},"2026-02-04":{sunrise:"7:43",sunset:"5:58"},"2026-02-05":{sunrise:"7:42",sunset:"5:59"},"2026-02-06":{sunrise:"7:41",sunset:"6:00"},"2026-02-07":{sunrise:"7:40",sunset:"6:02"},"2026-02-08":{sunrise:"7:39",sunset:"6:03"},"2026-02-09":{sunrise:"7:37",sunset:"6:04"},"2026-02-10":{sunrise:"7:36",sunset:"6:05"},"2026-02-11":{sunrise:"7:35",sunset:"6:06"},"2026-02-12":{sunrise:"7:34",sunset:"6:08"},"2026-02-13":{sunrise:"7:33",sunset:"6:09"},"2026-02-14":{sunrise:"7:31",sunset:"6:10"},"2026-02-15":{sunrise:"7:30",sunset:"6:11"},"2026-02-16":{sunrise:"7:29",sunset:"6:13"},"2026-02-17":{sunrise:"7:27",sunset:"6:14"},"2026-02-18":{sunrise:"7:26",sunset:"6:15"},"2026-02-19":{sunrise:"7:25",sunset:"6:16"},"2026-02-20":{sunrise:"7:23",sunset:"6:17"},"2026-02-21":{sunrise:"7:22",sunset:"6:18"},"2026-02-22":{sunrise:"7:20",sunset:"6:20"},"2026-02-23":{sunrise:"7:19",sunset:"6:21"},"2026-02-24":{sunrise:"7:17",sunset:"6:22"},"2026-02-25":{sunrise:"7:16",sunset:"6:23"},"2026-02-26":{sunrise:"7:15",sunset:"6:24"},"2026-02-27":{sunrise:"7:13",sunset:"6:25"},"2026-02-28":{sunrise:"7:12",sunset:"6:27"}};
     
-    let map, currentMarker, infoWindow, startLocation, startLocationMarker, directionsService, geocoder, directionsRenderer;
-    let alternateRoutePolylines = [];
+    // --- Global Variables ---
+    let map, currentMarker, startLocationMarker, infoWindow, directionsService, directionsRenderer;
+    let startLocation = null;
     let isLocationSet = false;
-    let isSettingStartLocation = false;
     let baseDriveTime = 0;
     let driveTimeAdjustment = 0;
     let selectedGameType = 'deer';
+    let alternateRoutePolylines = [];
     let fullDirectionsResponse = null;
 
     function initMap() {
-        geocoder = new google.maps.Geocoder();
-        const defaultLocation = { lat: 41.5, lng: -99.5 };
+        const defaultLocation = { lat: 41.5, lng: -99.5 }; // Center of Nebraska
         map = new google.maps.Map(document.getElementById("map"), {
             zoom: 7,
             center: defaultLocation,
@@ -115,7 +83,7 @@
             mapTypeControl: true, streetViewControl: false, zoomControl: true, scaleControl: true, rotateControl: false, fullscreenControl: true
         });
 
-        // Initialize ONE DirectionsRenderer
+        // Initialize ONE DirectionsRenderer for the main route
         directionsRenderer = new google.maps.DirectionsRenderer({
              suppressMarkers: true,
              polylineOptions: {
@@ -130,8 +98,6 @@
         directionsService = new google.maps.DirectionsService();
 
         // --- Event Listeners ---
-        document.getElementById('setStartLocationBtn').addEventListener('click', handleSetStartAddress);
-        document.getElementById('setStartOnMapBtn').addEventListener('click', handleSetStartOnMap);
         const searchInput = document.getElementById("search-input");
         const searchBox = new google.maps.places.SearchBox(searchInput);
         map.addListener("bounds_changed", () => searchBox.setBounds(map.getBounds()));
@@ -139,7 +105,7 @@
             const places = searchBox.getPlaces();
             if (places.length > 0) placeMarker(places[0].geometry.location);
         });
-        map.addListener("click", handleMapClick);
+        map.addListener("click", (e) => placeMarker(e.latLng));
         document.getElementById('latLngInput').addEventListener('change', handleLatLngInput);
         document.getElementById('huntDate').addEventListener('change', updateCalculateButton);
         document.getElementById('calculateButton').addEventListener('click', calculateTimeline);
@@ -149,51 +115,30 @@
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const userCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    startLocation = userCoords; // Set the global startLocation
+                    
+                    // Add the green marker for the user
+                    startLocationMarker = new google.maps.Marker({
+                        position: startLocation, map: map, title: "Your Start Location",
+                        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#4CAF50", fillOpacity: 1, strokeWeight: 2, strokeColor: "#ffffff" },
+                    });
+
+                    // Center the map if they are in Nebraska
                     if (isInNebraska(userCoords)) {
-                        setStartLocation(userCoords);
                         map.setCenter(userCoords);
                         map.setZoom(10);
-                    } else {
-                        startLocation = userCoords;
-                        updateStartLocationStatus('Your location found (outside NE).', 'ready');
                     }
+                    updateDriveTimeStatus('Your location found. Select a hunting spot.', 'ready');
                 },
-                () => {} // Fail gracefully
-            );
-        }
-    }
-
-    function handleSetStartAddress() {
-        const address = document.getElementById('startLocationInput').value;
-        if (address) {
-            updateStartLocationStatus('Finding address...', 'calculating');
-            geocoder.geocode({ 'address': address, 'componentRestrictions': {'country': 'US'} }, (results, status) => {
-                if (status === 'OK') {
-                    setStartLocation(results[0].geometry.location);
-                    map.panTo(results[0].geometry.location);
-                } else {
-                    updateStartLocationStatus('Address not found. Please try again.', 'error');
+                () => {
+                    updateDriveTimeStatus('Could not get your location. Route calculation disabled.', 'error');
                 }
-            });
-        }
-    }
-
-    function handleSetStartOnMap() {
-        isSettingStartLocation = true;
-        document.getElementById('setStartOnMapBtn').classList.add('active');
-        updateStartLocationStatus('Click on the map to set your start location.', 'calculating');
-    }
-
-    function handleMapClick(e) {
-        if (isSettingStartLocation) {
-            setStartLocation(e.latLng);
-            isSettingStartLocation = false;
-            document.getElementById('setStartOnMapBtn').classList.remove('active');
+            );
         } else {
-            placeMarker(e.latLng);
+            updateDriveTimeStatus('Geolocation is not supported by your browser.', 'error');
         }
     }
-    
+
     function handleLatLngInput() {
         const coords = this.value.trim().split(',').map(c => parseFloat(c.trim()));
         if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
@@ -201,33 +146,10 @@
         }
     }
     
-    function setStartLocation(location) {
-        startLocation = location;
-        if (startLocationMarker) {
-            startLocationMarker.setPosition(location);
-        } else {
-            startLocationMarker = new google.maps.Marker({
-                position: location, map: map, title: "Your Start Location",
-                icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#4CAF50", fillOpacity: 1, strokeWeight: 2, strokeColor: "#ffffff" },
-            });
-        }
-        
-        geocoder.geocode({ 'location': location }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-                updateStartLocationStatus(`Start location set: ${results[0].formatted_address}`, 'ready');
-            } else {
-                updateStartLocationStatus('Start location pin set.', 'ready');
-            }
-        });
-
-        if (currentMarker) calculateAndDisplayRoute(currentMarker.getPosition());
-    }
-
     function placeMarker(location) {
         updateLatLngInput(location);
         isLocationSet = true;
         updateCalculateButton();
-        updateLocationStatus("Hunting spot set. Calculating route...", "calculating");
         if (currentMarker) {
             currentMarker.setPosition(location);
         } else {
@@ -239,10 +161,10 @@
     
     function calculateAndDisplayRoute(destination) {
         if (!startLocation) {
-            updateLocationStatus("Set a starting location to calculate route.", "error");
+            updateLocationStatus("Cannot calculate route without a start location.", "error");
             return;
         }
-        
+        updateLocationStatus("Calculating route...", "calculating");
         clearRoutes();
 
         directionsService.route({
@@ -252,10 +174,10 @@
             provideRouteAlternatives: true
         }, (response, status) => {
             if (status === "OK") {
-                fullDirectionsResponse = response; // Store the full response
-                directionsRenderer.setDirections(response); // This zooms the map to fit all routes
+                fullDirectionsResponse = response;
+                directionsRenderer.setDirections(response);
                 showRouteOptions(response.routes);
-                updateLocationStatus(`Route found. ${response.routes.length} option(s) available.`, "ready");
+                updateLocationStatus(`${response.routes.length} route(s) found.`, "ready");
             } else {
                 updateLocationStatus('Could not calculate drive time. Check API key.', 'error');
             }
@@ -266,19 +188,13 @@
         const routesList = document.getElementById('routesList');
         routesList.innerHTML = '';
         
-        // Draw alternate routes as simple grey lines
         for (let i = 1; i < routes.length; i++) {
             const polyline = new google.maps.Polyline({
-                path: routes[i].overview_path,
-                strokeColor: '#888888',
-                strokeOpacity: 0.6,
-                strokeWeight: 6,
-                map: map
+                path: routes[i].overview_path, strokeColor: '#888888', strokeOpacity: 0.6, strokeWeight: 6, map: map
             });
             alternateRoutePolylines.push(polyline);
         }
         
-        // Display route choices in the panel
         routes.forEach((route, index) => {
             const routeDiv = document.createElement('div');
             routeDiv.className = 'route-option';
@@ -287,7 +203,6 @@
             const distance = route.legs[0].distance.text;
             const summary = route.summary || 'Main route';
             routeDiv.innerHTML = `<div class="route-summary"><div class="route-time">${duration} min</div><div class="route-distance">${distance}</div></div><div class="route-description">via ${summary}</div>`;
-            
             routeDiv.addEventListener('click', () => {
                 selectRoute(index);
                 document.querySelectorAll('.route-option').forEach(r => r.classList.remove('selected'));
@@ -297,53 +212,49 @@
         });
 
         if (routes.length > 0) {
-            baseDriveTime = Math.round(routes[0].legs[0].duration.value / 60);
-            driveTimeAdjustment = 0;
-            document.getElementById('driveTime').value = baseDriveTime;
-            document.getElementById('adjustedTime').textContent = baseDriveTime;
+            updateDriveTime(routes[0]);
             document.getElementById('routeOptions').classList.add('show');
             document.getElementById('driveTimeAdjuster').classList.add('show');
         }
     }
 
     function selectRoute(index) {
-        // Set the main renderer to the selected route
         directionsRenderer.setRouteIndex(index);
-        
-        // Hide all alternate polylines
         alternateRoutePolylines.forEach(p => p.setMap(null));
-        
-        // Re-draw polylines for routes that are NOT the selected one
+        alternateRoutePolylines = [];
         for (let i = 0; i < fullDirectionsResponse.routes.length; i++) {
             if (i !== index) {
                 const polyline = new google.maps.Polyline({
-                    path: fullDirectionsResponse.routes[i].overview_path,
-                    strokeColor: '#888888',
-                    strokeOpacity: 0.6,
-                    strokeWeight: 6,
-                    map: map
+                    path: fullDirectionsResponse.routes[i].overview_path, strokeColor: '#888888', strokeOpacity: 0.6, strokeWeight: 6, map: map
                 });
                 alternateRoutePolylines.push(polyline);
             }
         }
+        updateDriveTime(fullDirectionsResponse.routes[index]);
+    }
+    
+    function updateDriveTime(route) {
+        baseDriveTime = Math.round(route.legs[0].duration.value / 60);
+        driveTimeAdjustment = 0;
+        document.getElementById('driveTime').value = baseDriveTime;
+        document.getElementById('adjustedTime').textContent = baseDriveTime;
     }
     
     function clearRoutes() {
-        directionsRenderer.setDirections({routes: []}); // Clear main route
-        alternateRoutePolylines.forEach(p => p.setMap(null)); // Clear grey lines
+        directionsRenderer.setDirections({routes: []});
+        alternateRoutePolylines.forEach(p => p.setMap(null));
         alternateRoutePolylines = [];
         document.getElementById('routeOptions').classList.remove('show');
         document.getElementById('driveTimeAdjuster').classList.remove('show');
     }
 
-    // --- Utility and Minor Functions ---
-    function updateStartLocationStatus(message, type) { const statusEl = document.getElementById('startLocationStatus'); statusEl.className = `status-indicator status-${type}`; statusEl.textContent = message; }
-    function isInNebraska(location) { const nebraskaBounds = { north: 43.0, south: 40.0, west: -104.05, east: -95.3 }; const lat = location.lat; const lng = location.lng; return (lat >= nebraskaBounds.south && lat <= nebraskaBounds.north && lng >= nebraskaBounds.west && lng <= nebraskaBounds.east); }
+    function updateDriveTimeStatus(message, type) { const statusEl = document.getElementById('driveTimeStatus'); statusEl.className = `status-indicator status-${type}`; statusEl.textContent = message; }
+    function isInNebraska(location) { const nebraskaBounds = { north: 43.0, south: 40.0, west: -104.05, east: -95.3 }; return (location.lat >= nebraskaBounds.south && location.lat <= nebraskaBounds.north && location.lng >= nebraskaBounds.west && location.lng <= nebraskaBounds.east); }
     function setupGameTypeSelector() { const gameTypeBtns = document.querySelectorAll('.game-type-btn'); gameTypeBtns.forEach(btn => { btn.addEventListener('click', function() { gameTypeBtns.forEach(b => b.classList.remove('active')); this.classList.add('active'); selectedGameType = this.dataset.type; }); }); }
     function setupMobileToggle() { const mobileToggle = document.getElementById('mobileToggle'); const controlsPanel = document.getElementById('controlsPanel'); if (mobileToggle) { mobileToggle.addEventListener('click', function() { const isShown = controlsPanel.classList.toggle('show'); mobileToggle.textContent = isShown ? 'v' : '^'; }); } }
     function updateLocationStatus(message, type = 'waiting') { const statusEl = document.getElementById('locationStatus'); statusEl.className = `status-indicator status-${type}`; statusEl.textContent = message; }
     function updateCalculateButton() { const button = document.getElementById('calculateButton'); const buttonText = document.getElementById('buttonText'); const huntDate = document.getElementById('huntDate').value; if (isLocationSet && huntDate) { button.disabled = false; buttonText.textContent = 'Calculate Timeline'; } else if (!huntDate) { button.disabled = true; buttonText.textContent = 'Select Hunt Date'; } else { button.disabled = true; buttonText.textContent = 'Set Location First'; } }
-    function adjustDriveTime(minutes) { const selectedRoute = fullDirectionsResponse.routes[directionsRenderer.getRouteIndex()]; baseDriveTime = Math.round(selectedRoute.legs[0].duration.value / 60); driveTimeAdjustment += minutes; const totalTime = baseDriveTime + driveTimeAdjustment; document.getElementById('adjustedTime').textContent = totalTime; document.getElementById('driveTime').value = totalTime; }
+    function adjustDriveTime(minutes) { driveTimeAdjustment += minutes; const totalTime = baseDriveTime + driveTimeAdjustment; document.getElementById('adjustedTime').textContent = totalTime; document.getElementById('driveTime').value = totalTime; }
     function updateLatLngInput(location) { document.getElementById('latLngInput').value = `${location.lat().toFixed(6)}, ${location.lng().toFixed(6)}`; window.huntLocation = { lat: location.lat(), lng: location.lng() }; }
     function calculateTimeline() { const button = document.getElementById('calculateButton'), buttonText = document.getElementById('buttonText'), spinner = document.getElementById('buttonSpinner'); button.disabled = true; buttonText.textContent = 'Calculating...'; spinner.style.display = 'inline-block'; setTimeout(() => { const huntDateInput = document.getElementById('huntDate').value; if (!huntDateInput || !sunData[huntDateInput] || !window.huntLocation) { resetButton(); return; } const sunInfo = sunData[huntDateInput]; const timeAdjustmentMinutes = Math.round((window.huntLocation.lng - -99.084254) * 4); const adjustedSunrise = adjustTime(sunInfo.sunrise, timeAdjustmentMinutes), legalShootingTime = adjustTime(adjustedSunrise, -30); const adjustedSunset = adjustTime(sunInfo.sunset, timeAdjustmentMinutes); let endLegalShooting = (selectedGameType === 'deer') ? adjustTime(adjustedSunset, 30) : adjustedSunset; const driveTime = parseInt(document.getElementById('driveTime').value) || 0, bufferTime = parseInt(document.getElementById('bufferTime').value) || 0, parkToSetTime = parseInt(document.getElementById('parkToSetTime').value) || 0, setToEstablishTime = parseInt(document.getElementById('setToEstablishTime').value) || 0; const establishedBy = adjustTime(legalShootingTime, -bufferTime), setBy = adjustTime(establishedBy, -setToEstablishTime), parkedBy = adjustTime(setBy, -parkToSetTime), leaveBy = adjustTime(parkedBy, -driveTime); document.getElementById('resultsContent').innerHTML = `<div class="timeline"><div class="timeline-item highlight"><div class="timeline-label">Leave By</div><div class="timeline-time">${leaveBy}</div></div><div class="timeline-item"><div class="timeline-label">Parked By</div><div class="timeline-time">${parkedBy}</div></div><div class="timeline-item"><div class="timeline-label">At Stand/Blind</div><div class="timeline-time">${setBy}</div></div><div class="timeline-item"><div class="timeline-label">Established By</div><div class="timeline-time">${establishedBy}</div></div><div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Begins</div><div class="timeline-time">${legalShootingTime}</div></div><div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Ends</div><div class="timeline-time">${endLegalShooting}</div></div></div><div class="info-grid"><div class="info-item"><div class="info-label">Chart Sunrise</div><div class="info-value">${sunInfo.sunrise}</div></div><div class="info-item"><div class="info-label">Chart Sunset</div><div class="info-value">${sunInfo.sunset}</div></div><div class="info-item"><div class="info-label">Adjusted Sunrise</div><div class="info-value">${adjustedSunrise}</div></div><div class="info-item"><div class="info-label">Adjusted Sunset</div><div class="info-value">${adjustedSunset}</div></div><div class="info-item"><div class="info-label">Game Type</div><div class="info-value">${selectedGameType === 'deer' ? 'Deer' : 'Waterfowl'}</div></div><div class="info-item"><div class="info-label">Drive Time</div><div class="info-value">${driveTime} minutes</div></div></div>`; const resultsSection = document.getElementById('resultsSection'); resultsSection.classList.add('show'); if (window.innerWidth <= 768) { resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); } const copyText = `Hunt Plan for ${huntDateInput} (${selectedGameType}):\n\nLeave by: ${leaveBy}\nParked by: ${parkedBy}\nAt stand/blind: ${setBy}\nEstablished: ${establishedBy}\n\nLegal Shooting Time: ${legalShootingTime} - ${endLegalShooting}\n\nDrive: ${driveTime}m, Walk: ${parkToSetTime}m, Setup: ${setToEstablishTime}m`; document.getElementById('copyButton').onclick = function() { navigator.clipboard.writeText(copyText).then(() => { const btn = this; const originalText = btn.innerHTML; btn.innerHTML = 'Copied!'; setTimeout(() => { btn.innerHTML = originalText; }, 2000); }); }; resetButton(); }, 50); }
     function resetButton() { const button = document.getElementById('calculateButton'), buttonText = document.getElementById('buttonText'), spinner = document.getElementById('buttonSpinner'); button.disabled = false; buttonText.textContent = 'Calculate Timeline'; spinner.style.display = 'none'; }
@@ -355,6 +266,6 @@
         setupMobileToggle();
     };
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy5kkSZkLS2ApeXHteQ5MuVIL53L972Jw&libraries=places&callback=initMap"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&libraries=places&callback=initMap"></script>
 </body>
 </html>
