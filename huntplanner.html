@@ -209,7 +209,7 @@
             
             /* FIX 2: Add top padding to the map to prevent controls from overlapping */
             #map .gm-style > div:nth-child(2) {
-                 padding-top: 70px !important;
+                padding-top: 70px !important;
             }
 
             /* FIX 1: Give button a fixed, predictable height */
@@ -404,6 +404,13 @@
     let locationAccessDenied = false;
     let currentState = null;
 
+    // TZ UPGRADE: Add state variables for time zone information
+    let startZoneInfo = { id: null, abbreviation: null };
+    let huntZoneInfo = { id: null, abbreviation: null };
+    // TZ UPGRADE: Your Google Maps API key. The Time Zone API must be enabled for this key in your Google Cloud Console.
+    const GOOGLE_API_KEY = 'AIzaSyAy5kkSZkLS2ApeXHteQ5MuVIL53L972Jw';
+
+
     function initMap() {
         // Expanded bounds to include NE, IA, WY, KS
         const defaultLocation = { lat: 41.5, lng: -99.5 };
@@ -469,6 +476,8 @@
         addEventListeners();
         setTodaysDate();
         tryGeolocation();
+        // TZ UPGRADE: Determine the user's starting time zone from their browser.
+        setStartZone();
     }
 
     function addEventListeners() {
@@ -579,7 +588,7 @@
         return null;
     }
 
-    function placeMarker(location) {
+    async function placeMarker(location) { // TZ UPGRADE: Made function async to await time zone lookup
         const lat = location.lat();
         const lng = location.lng();
         
@@ -587,11 +596,13 @@
         currentState = detectState(lat, lng);
         updateStateBadge(currentState);
         
+        // TZ UPGRADE: Get time zone for the selected hunting location
+        await getHuntZone(lat, lng);
+
         updateLatLngInput(location);
         isLocationSet = true;
         updateCalculateButton();
-        updateLocationStatus("Hunting location set" + (currentState ? ` in ${currentState}` : ""), "ready");
-
+        
         const mobileToggle = document.getElementById('mobileToggle');
         mobileToggle.classList.remove('initial');
         if (!document.getElementById('controlsPanel').classList.contains('show')) {
@@ -734,35 +745,21 @@
     }
 
     async function getSunriseSunsetForLocation(lat, lng, date) {
-        // Using sunrise-sunset.org API (free, no key required)
-        // For production, you could switch to Google Weather API
+        // Using sunrise-sunset.org API which returns UTC times
         const url = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&date=${date}&formatted=0`;
-        
         try {
             const response = await fetch(url);
             const data = await response.json();
-            
             if (data.status === 'OK') {
-                // Convert UTC times to local time
-                const sunrise = new Date(data.results.sunrise);
-                const sunset = new Date(data.results.sunset);
-                
-                // Format as HH:MM
-                const formatTime = (date) => {
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${hours}:${minutes}`;
-                };
-                
+                // TZ UPGRADE: Return the raw UTC ISO strings. Conversion will happen later.
                 return {
-                    sunrise: formatTime(sunrise),
-                    sunset: formatTime(sunset)
+                    sunrise: data.results.sunrise,
+                    sunset: data.results.sunset
                 };
             }
         } catch (error) {
             console.error('Error fetching sunrise/sunset:', error);
         }
-        
         return null;
     }
 
@@ -775,7 +772,8 @@
         spinner.style.display = 'inline-block';
 
         const huntDateInput = document.getElementById('huntDate').value;
-        if (!huntDateInput || !huntLocation) {
+        if (!huntDateInput || !huntLocation || !huntZoneInfo.id) {
+             alert('Please ensure location is set and time zone has been found.');
             resetButton();
             return;
         }
@@ -785,87 +783,97 @@
         let calcText = '';
 
         if (currentState === 'NE' && sunData[huntDateInput]) {
-            // Nebraska: Use chart data and adjustments
             sunInfo = sunData[huntDateInput];
             let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number);
-            if (sunsetHour < 12) sunsetHour += 12;
+            if (sunsetHour < 12) sunsetHour += 12; // PM correction
             const correctedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`;
 
             const locationInfo = calculateDistanceFromKearney(huntLocation.lat, huntLocation.lng);
             const timeAdjustmentMinutes = Math.round(locationInfo.distance / MILES_PER_MINUTE);
             const actualAdjustment = locationInfo.direction === 'East' ? -timeAdjustmentMinutes : timeAdjustmentMinutes;
-            calcText = `${locationInfo.distance.toFixed(1)} miles ${locationInfo.direction} of Kearney ÷ ${MILES_PER_MINUTE} = ${timeAdjustmentMinutes} minutes (${locationInfo.direction === 'East' ? 'Subtract' : 'Add'} ${timeAdjustmentMinutes} min)`;
+            calcText = `${locationInfo.distance.toFixed(1)} miles ${locationInfo.direction} of Kearney ÷ ${MILES_PER_MINUTE} = ${timeAdjustmentMinutes} min adjustment`;
 
             adjustedSunrise = adjustTime(sunInfo.sunrise, actualAdjustment);
             adjustedSunset = adjustTime(correctedSunset, actualAdjustment);
-        } else {
-            // Iowa, Kansas, Wyoming: Use API for actual sunrise/sunset
-            const apiSunData = await getSunriseSunsetForLocation(huntLocation.lat, huntLocation.lng, huntDateInput);
             
+            // TZ UPGRADE: Apply -1 hour adjustment if hunting in MT, as per NE regulations.
+            if (huntZoneInfo.abbreviation.startsWith('M')) {
+                adjustedSunrise = adjustTime(adjustedSunrise, -60);
+                adjustedSunset = adjustTime(adjustedSunset, -60);
+                calcText += ' (-1hr for MT)';
+            }
+
+        } else {
+            const apiSunData = await getSunriseSunsetForLocation(huntLocation.lat, huntLocation.lng, huntDateInput);
             if (apiSunData) {
-                adjustedSunrise = apiSunData.sunrise;
-                adjustedSunset = apiSunData.sunset;
-                sunInfo = apiSunData; // For display in info grid
-                calcText = 'Location-specific times (no adjustment needed)';
+                // TZ UPGRADE: Convert UTC times from API to the local time of the hunting spot.
+                const sunriseUtcDate = new Date(apiSunData.sunrise);
+                const sunsetUtcDate = new Date(apiSunData.sunset);
+                adjustedSunrise = formatUtcDateToTime(sunriseUtcDate, huntZoneInfo.id);
+                adjustedSunset = formatUtcDateToTime(sunsetUtcDate, huntZoneInfo.id);
+                sunInfo = { sunrise: adjustedSunrise, sunset: adjustedSunset };
+                calcText = `Astronomically accurate for lat/lng in ${huntZoneInfo.abbreviation}.`;
             } else {
-                // Fallback to Nebraska data if API fails
-                alert('Could not fetch sunrise/sunset data. Using Nebraska chart as fallback.');
-                if (sunData[huntDateInput]) {
-                    sunInfo = sunData[huntDateInput];
-                    adjustedSunrise = sunInfo.sunrise;
-                    let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number);
-                    if (sunsetHour < 12) sunsetHour += 12;
-                    adjustedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`;
-                } else {
-                    resetButton();
-                    return;
-                }
+                alert('Could not fetch sunrise/sunset data. Please check your connection.');
+                resetButton();
+                return;
             }
         }
 
-        // Calculate legal shooting times (same rules for all states)
         const legalShootingTime = adjustTime(adjustedSunrise, -30);
         const endLegalShooting = (selectedGameType === 'deer') ? adjustTime(adjustedSunset, 30) : adjustedSunset;
 
-        // Calculate timeline
+        // TZ UPGRADE: Perform all timeline calculations using absolute Date objects to handle time zones correctly.
         const driveTime = parseInt(document.getElementById('driveTime').value) || 0;
         const bufferTime = parseInt(document.getElementById('bufferTime').value) || 0;
         const parkToSetTime = parseInt(document.getElementById('parkToSetTime').value) || 0;
         const setToEstablishTime = parseInt(document.getElementById('setToEstablishTime').value) || 0;
 
-        const establishedBy = adjustTime(legalShootingTime, -bufferTime);
-        const setBy = adjustTime(establishedBy, -setToEstablishTime);
-        const parkedBy = adjustTime(setBy, -parkToSetTime);
-        const leaveBy = adjustTime(parkedBy, -driveTime);
-
-        // Display results
+        // 1. Get a reliable Date object for the legal shooting time in the hunt time zone.
+        const huntZoneOffset = getUtcOffsetString(huntZoneInfo.id, huntDateInput);
+        const legalShootingIso = `${huntDateInput}T${legalShootingTime}:00${huntZoneOffset}`;
+        const legalShootingDate = new Date(legalShootingIso);
+        
+        // 2. Create other Date objects by subtracting minutes (as milliseconds).
+        const establishedByDate = new Date(legalShootingDate.getTime() - (bufferTime * 60000));
+        const setByDate = new Date(establishedByDate.getTime() - (setToEstablishTime * 60000));
+        const parkedByDate = new Date(setByDate.getTime() - (parkToSetTime * 60000));
+        const leaveByDate = new Date(parkedByDate.getTime() - (driveTime * 60000));
+        const endLegalShootingDate = new Date(`${huntDateInput}T${endLegalShooting}:00${huntZoneOffset}`);
+        
+        // 3. Format these dates into strings for display, using the correct time zone for each.
+        const leaveByStr = formatDateToTimeAmPm(leaveByDate, startZoneInfo.id, startZoneInfo.abbreviation);
+        const parkedByStr = formatDateToTimeAmPm(parkedByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const setByStr = formatDateToTimeAmPm(setByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const establishedByStr = formatDateToTimeAmPm(establishedByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const legalShootingStr = formatDateToTimeAmPm(legalShootingDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const endLegalShootingStr = formatDateToTimeAmPm(endLegalShootingDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        
         document.getElementById('timeline-results').innerHTML = `<div class="timeline">
-            <div class="timeline-item highlight"><div class="timeline-label">Leave By</div><div class="timeline-time">${formatTimeAMPM(leaveBy)}</div></div>
-            <div class="timeline-item"><div class="timeline-label">Parked By</div><div class="timeline-time">${formatTimeAMPM(parkedBy)}</div></div>
-            <div class="timeline-item"><div class="timeline-label">At Stand/Blind</div><div class="timeline-time">${formatTimeAMPM(setBy)}</div></div>
-            <div class="timeline-item"><div class="timeline-label">Established By</div><div class="timeline-time">${formatTimeAMPM(establishedBy)}</div></div>
-            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Begins</div><div class="timeline-time">${formatTimeAMPM(legalShootingTime)}</div></div>
-            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Ends</div><div class="timeline-time">${formatTimeAMPM(endLegalShooting)}</div></div>
+            <div class="timeline-item highlight"><div class="timeline-label">Leave By</div><div class="timeline-time">${leaveByStr}</div></div>
+            <div class="timeline-item"><div class="timeline-label">Parked By</div><div class="timeline-time">${parkedByStr}</div></div>
+            <div class="timeline-item"><div class="timeline-label">At Stand/Blind</div><div class="timeline-time">${setByStr}</div></div>
+            <div class="timeline-item"><div class="timeline-label">Established By</div><div class="timeline-time">${establishedByStr}</div></div>
+            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Begins</div><div class="timeline-time">${legalShootingStr}</div></div>
+            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Ends</div><div class="timeline-time">${endLegalShootingStr}</div></div>
         </div>`;
 
         let infoGridHTML = `<div class="info-grid">`;
-        
+        const adjustedSunriseStr = formatDateToTimeAmPm(new Date(`${huntDateInput}T${adjustedSunrise}:00${huntZoneOffset}`), huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const adjustedSunsetStr = formatDateToTimeAmPm(new Date(`${huntDateInput}T${adjustedSunset}:00${huntZoneOffset}`), huntZoneInfo.id, huntZoneInfo.abbreviation);
+
         if (currentState === 'NE') {
-            // Nebraska: Show both chart and adjusted times
-            let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number);
-            if (sunsetHour < 12) sunsetHour += 12;
-            const correctedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`;
-            
-            infoGridHTML += `
-                <div class="info-item"><div class="info-label">Chart Sunrise</div><div class="info-value">${formatTimeAMPM(sunInfo.sunrise)}</div></div>
-                <div class="info-item"><div class="info-label">Chart Sunset</div><div class="info-value">${formatTimeAMPM(correctedSunset)}</div></div>
-                <div class="info-item"><div class="info-label">Adjusted Sunrise</div><div class="info-value">${formatTimeAMPM(adjustedSunrise)}</div><div class="info-calc">${calcText}<br/><a href="http://digital.outdoornebraska.gov/i/1537408-small-game-and-waterfowl-guide-2025-26-web/39" target="_blank">Pg. 40 2025 Waterfowl Guide</a></div></div>
-                <div class="info-item"><div class="info-label">Adjusted Sunset</div><div class="info-value">${formatTimeAMPM(adjustedSunset)}</div><div class="info-calc">${calcText}</div></div>`;
+             const chartSunriseStr = formatTimeAMPM(sunInfo.sunrise, 'CT');
+             const chartSunsetStr = formatTimeAMPM(sunInfo.sunset, 'CT', true); // Add PM correction
+             infoGridHTML += `
+                <div class="info-item"><div class="info-label">Chart Sunrise</div><div class="info-value">${chartSunriseStr}</div></div>
+                <div class="info-item"><div class="info-label">Chart Sunset</div><div class="info-value">${chartSunsetStr}</div></div>
+                <div class="info-item"><div class="info-label">Adjusted Sunrise</div><div class="info-value">${adjustedSunriseStr}</div><div class="info-calc">${calcText}<br/><a href="http://digital.outdoornebraska.gov/i/1537408-small-game-and-waterfowl-guide-2025-26-web/39" target="_blank">Pg. 40 2025 Waterfowl Guide</a></div></div>
+                <div class="info-item"><div class="info-label">Adjusted Sunset</div><div class="info-value">${adjustedSunsetStr}</div><div class="info-calc">${calcText}</div></div>`;
         } else {
-            // Other states: Show actual location times
             infoGridHTML += `
-                <div class="info-item"><div class="info-label">Location Sunrise</div><div class="info-value">${formatTimeAMPM(adjustedSunrise)}</div></div>
-                <div class="info-item"><div class="info-label">Location Sunset</div><div class="info-value">${formatTimeAMPM(adjustedSunset)}</div></div>
+                <div class="info-item"><div class="info-label">Location Sunrise</div><div class="info-value">${adjustedSunriseStr}</div></div>
+                <div class="info-item"><div class="info-label">Location Sunset</div><div class="info-value">${adjustedSunsetStr}</div></div>
                 <div class="info-item"><div class="info-label">State</div><div class="info-value">${currentState || 'Unknown'}</div><div class="info-calc">${calcText}</div></div>
                 <div class="info-item"><div class="info-label">Legal Hours</div><div class="info-value">${selectedGameType === 'deer' ? '30 min before sunrise to 30 min after sunset' : '30 min before sunrise to sunset'}</div></div>`;
         }
@@ -882,9 +890,8 @@
         if (window.innerWidth <= 768) {
             resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-
-        const stateName = currentState || 'location';
-        const copyText = `Hunt Plan for ${huntDateInput} in ${stateName} (${selectedGameType}):\n\nLeave by: ${formatTimeAMPM(leaveBy)}\nParked by: ${formatTimeAMPM(parkedBy)}\nAt stand/blind: ${formatTimeAMPM(setBy)}\nEstablished: ${formatTimeAMPM(establishedBy)}\n\nLegal Shooting Time: ${formatTimeAMPM(legalShootingTime)} - ${formatTimeAMPM(endLegalShooting)}\n\nDrive: ${driveTime}m, Walk: ${parkToSetTime}m, Setup: ${setToEstablishTime}m`;
+        
+        const copyText = `Hunt Plan for ${huntDateInput} in ${currentState || 'location'} (${selectedGameType}):\n\nLeave by: ${leaveByStr}\nParked by: ${parkedByStr}\nAt stand/blind: ${setByStr}\nEstablished: ${establishedByStr}\n\nLegal Shooting: ${legalShootingStr} - ${endLegalShootingStr}\n\nDrive: ${driveTime}m, Walk: ${parkToSetTime}m, Setup: ${setToEstablishTime}m`;
         
         document.getElementById('copyButton').onclick = function() {
             navigator.clipboard.writeText(copyText).then(() => {
@@ -900,6 +907,85 @@
     }
 
     // --- Helper & Utility Functions ---
+
+    // TZ UPGRADE: Sets the starting time zone based on the user's browser.
+    function setStartZone() {
+        const userTimeZoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        startZoneInfo.id = userTimeZoneId;
+        startZoneInfo.abbreviation = getAbbreviation(userTimeZoneId);
+    }
+
+    // TZ UPGRADE: Gets time zone info for the hunting location from Google's API.
+    async function getHuntZone(lat, lng) {
+        // Use a timestamp for the selected hunt date to get correct DST info.
+        const huntDate = document.getElementById('huntDate').value;
+        const timestamp = new Date(huntDate + 'T12:00:00').getTime() / 1000;
+        
+        const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${GOOGLE_API_KEY}`;
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.status === 'OK') {
+                huntZoneInfo.id = data.timeZoneId;
+                huntZoneInfo.abbreviation = getAbbreviation(data.timeZoneId, new Date(timestamp * 1000));
+                updateLocationStatus(`Location set in ${huntZoneInfo.abbreviation} time zone.`, 'ready');
+            } else {
+                huntZoneInfo = { id: null, abbreviation: null }; // Reset on failure
+                updateLocationStatus(`Error: Could not determine time zone.`, 'error');
+                console.error("Time Zone API Error:", data.errorMessage);
+            }
+        } catch (error) {
+            huntZoneInfo = { id: null, abbreviation: null }; // Reset on failure
+            updateLocationStatus(`Error: Time zone request failed.`, 'error');
+            console.error('Fetch error for Time Zone API:', error);
+        }
+    }
+    
+    // TZ UPGRADE: Reliably gets a time zone abbreviation (e.g., 'CDT', 'MST') for any IANA time zone ID.
+    function getAbbreviation(timeZoneId, date = new Date()) {
+        const parts = new Intl.DateTimeFormat('en-us', {
+            timeZone: timeZoneId,
+            timeZoneName: 'short',
+        }).formatToParts(date);
+        return parts.find(p => p.type === 'timeZoneName')?.value || '';
+    }
+    
+    // TZ UPGRADE: Gets the UTC offset string (e.g., "-05:00") needed to create absolute Date objects.
+    function getUtcOffsetString(timeZone, dateStr) {
+        const date = new Date(dateStr + 'T12:00:00'); // Use midday to avoid DST crossover issues
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone,
+            timeZoneName: 'longOffset'
+        }).formatToParts(date);
+        const offsetPart = parts.find(p => p.type === 'timeZoneName');
+        return offsetPart ? offsetPart.value.replace('GMT', '') : '+00:00';
+    }
+    
+    // TZ UPGRADE: Formats a UTC Date object into a time string for a specified time zone.
+    function formatUtcDateToTime(dateObj, timeZoneId) {
+        const timeString = dateObj.toLocaleTimeString('en-US', {
+            timeZone: timeZoneId,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+        // Handles edge case where midnight is "24:00"
+        return timeString.replace('24:', '00:');
+    }
+
+    // TZ UPGRADE: Formats a Date object to an AM/PM time string with a time zone label.
+    function formatDateToTimeAmPm(dateObj, timeZoneId, abbreviation) {
+        if (!dateObj || isNaN(dateObj)) return 'Invalid Time';
+        const formattedTime = dateObj.toLocaleTimeString('en-US', {
+            timeZone: timeZoneId,
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        });
+        return `${formattedTime} (${abbreviation})`;
+    }
+
 
     function updateDriveTimeStatus(message, type) {
         const statusEl = document.getElementById('driveTimeStatus');
@@ -917,12 +1003,15 @@
         const button = document.getElementById('calculateButton');
         const buttonText = document.getElementById('buttonText');
         const huntDate = document.getElementById('huntDate').value;
-        if (isLocationSet && huntDate) {
+        if (isLocationSet && huntDate && huntZoneInfo.id) {
             button.disabled = false;
             buttonText.textContent = 'Calculate Timeline';
         } else if (!huntDate) {
             button.disabled = true;
             buttonText.textContent = 'Select Hunt Date';
+        } else if (!huntZoneInfo.id) {
+             button.disabled = true;
+             buttonText.textContent = 'Finding Time Zone...';
         } else {
             button.disabled = true;
             buttonText.textContent = 'Set Location First';
@@ -961,13 +1050,18 @@
         updateCalculateButton();
     }
     
-    function formatTimeAMPM(time24) {
+    function formatTimeAMPM(time24, zoneLabel, correctPM = false) {
         if (!time24) return '';
-        const [hours, minutes] = time24.split(':');
+        let [hours, minutes] = time24.split(':');
         let h = parseInt(hours, 10);
+
+        if (correctPM && h < 12) { // Specifically for NE chart sunset times like "8:08"
+            h += 12;
+        }
+
         const ampm = h >= 12 ? 'PM' : 'AM';
         h = h % 12 || 12;
-        return `${h}:${String(minutes).padStart(2, '0')} ${ampm}`;
+        return `${h}:${String(minutes).padStart(2, '0')} ${ampm} (${zoneLabel})`;
     }
 
     function calculateDistanceFromKearney(lat, lng) {
