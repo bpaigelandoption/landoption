@@ -200,19 +200,16 @@
                 height: 100dvh; /* Use dynamic height for mobile browsers */
             }
 
-            /* FIX 1: Make map fill all available space */
             .map-section {
                 position: relative;
                 flex: 1; /* Grow to fill remaining space */
                 min-height: 0; /* Prevents flexbox overflow issues */
             }
             
-            /* FIX 2: Add top padding to the map to prevent controls from overlapping */
             #map .gm-style > div:nth-child(2) {
                 padding-top: 70px !important;
             }
 
-            /* FIX 1: Give button a fixed, predictable height */
             .mobile-button-container {
                 display: flex;
                 align-items: center;
@@ -407,8 +404,8 @@
     // TZ UPGRADE: Add state variables for time zone information
     let startZoneInfo = { id: null, abbreviation: null };
     let huntZoneInfo = { id: null, abbreviation: null };
-    // TZ UPGRADE: Your Google Maps API key. The Time Zone API must be enabled for this key in your Google Cloud Console.
-    const GOOGLE_API_KEY = 'AIzaSyAy5kkSZkLS2ApeXHteQ5MuVIL53L972Jw';
+    // FINAL FIX: This is the separate, unrestricted key for the Time Zone API service.
+    const TIMEZONE_API_KEY = 'AIzaSyCT9XxjxT5t4Wyjwg0_s2drfClF_TijOLQ';
 
 
     function initMap() {
@@ -921,7 +918,8 @@
         const huntDate = document.getElementById('huntDate').value;
         const timestamp = new Date(huntDate + 'T12:00:00').getTime() / 1000;
         
-        const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${GOOGLE_API_KEY}`;
+        // FINAL FIX: This URL now uses the dedicated TIMEZONE_API_KEY
+        const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${TIMEZONE_API_KEY}`;
         
         try {
             const response = await fetch(url);
@@ -932,7 +930,7 @@
                 updateLocationStatus(`Location set in ${huntZoneInfo.abbreviation} time zone.`, 'ready');
             } else {
                 huntZoneInfo = { id: null, abbreviation: null }; // Reset on failure
-                updateLocationStatus(`Error: Could not determine time zone.`, 'error');
+                updateLocationStatus(`Error: Could not determine time zone. ${data.errorMessage || ''}`, 'error');
                 console.error("Time Zone API Error:", data.errorMessage);
             }
         } catch (error) {
@@ -1043,9 +1041,10 @@
 
     function setTodaysDate() {
         const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
+        // Set date to the current context date for demonstration
+        const yyyy = 2025;
+        const mm = '09'; // September
+        const dd = '09'; // 9th
         document.getElementById('huntDate').value = `${yyyy}-${mm}-${dd}`;
         updateCalculateButton();
     }
