@@ -161,7 +161,7 @@
         .time-btn { background: #4CAF50; color: #1B1B1B; border: none; width: 35px; height: 35px; border-radius: 4px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s; }
         .time-btn:hover { background: #5CBF60; }
         .time-display { flex: 1; text-align: center; font-size: 1.1rem; font-weight: bold; color: #FFBF00; }
-        .results-section { display: none; margin-bottom: 30px; }
+        .results-section { display: none; }
         .results-section.show { display: block; }
         .timeline, .info-grid { background: #1B1B1B; border-radius: 6px; padding: 20px; }
         .timeline-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #333; }
@@ -179,60 +179,63 @@
         .btn-copy { margin-top: 15px; }
         
         .state-badge {
-            display: inline-block; padding: 4px 10px; border-radius: 4px;
-            background: rgba(76, 175, 80, 0.2); color: #4CAF50;
-            font-size: 0.85rem; font-weight: 600; margin-left: 10px;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
         }
-
-        /* WEATHER ADDITION: Styles for the new weather forecast section */
-        .weather-forecast-container {
-            display: flex; gap: 15px; overflow-x: auto;
-            padding: 10px 5px 20px 5px; /* Add padding for scrollbar and shadow */
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-            scrollbar-width: thin; scrollbar-color: #4CAF50 #2C2C2E;
-        }
-        .weather-forecast-container::-webkit-scrollbar { height: 8px; }
-        .weather-forecast-container::-webkit-scrollbar-track { background: #2C2C2E; border-radius: 4px; }
-        .weather-forecast-container::-webkit-scrollbar-thumb { background-color: #4CAF50; border-radius: 4px; }
-
-        .weather-card {
-            flex: 0 0 120px; /* Prevent shrinking, set base width */
-            background: #2C2C2E; border-radius: 8px;
-            padding: 15px; text-align: center;
-            border: 1px solid #333;
-        }
-        .weather-time { font-weight: bold; margin-bottom: 10px; }
-        .weather-wind-info { font-size: 0.9rem; margin-bottom: 8px; }
-        .weather-arrow {
-            font-size: 2rem; line-height: 1; color: #FFBF00;
-            display: inline-block; margin-bottom: 8px;
-        }
-        .weather-speed { font-size: 1.1rem; font-weight: bold; }
 
         /* --- MOBILE STYLES --- */
         @media (max-width: 768px) {
             body { overflow: hidden; }
+
             .main-container {
-                display: flex; flex-direction: column;
-                height: 100vh; height: 100dvh;
+                display: flex;
+                flex-direction: column;
+                height: 100vh; /* Use 100vh as it has better support */
+                height: 100dvh; /* Use dynamic height for mobile browsers */
             }
+
             .map-section {
-                position: relative; flex: 1; min-height: 0;
+                position: relative;
+                flex: 1; /* Grow to fill remaining space */
+                min-height: 0; /* Prevents flexbox overflow issues */
             }
+            
             #map .gm-style > div:nth-child(2) {
                 padding-top: 70px !important;
             }
+
             .mobile-button-container {
-                display: flex; align-items: center; justify-content: center;
-                height: 90px; flex-shrink: 0; background-color: #1B1B1B;
-                padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-                z-index: 1002; transition: transform 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 90px; /* Fixed height for reliability */
+                flex-shrink: 0; /* Prevent it from shrinking */
+                background-color: #1B1B1B;
+                padding: 15px;
+                box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+                z-index: 1002;
+                transition: transform 0.3s ease;
             }
-            .mobile-toggle { width: 100%; max-width: 400px; }
-            #search-input { right: 20px; }
+
+            .mobile-toggle {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            #search-input {
+                right: 20px;
+            }
             .controls-panel {
                 position: fixed; top: auto; bottom: 0; left: 0; right: 0; width: 100%;
-                height: 100%; max-height: 100%; border-left: none;
+                height: 100%;
+                max-height: 100%;
+                border-left: none;
                 border-top: 1px solid #333; border-radius: 20px 20px 0 0;
                 transform: translateY(100%);
             }
@@ -242,8 +245,14 @@
                 content: ''; display: block; width: 50px; height: 5px;
                 background: #555; border-radius: 3px; margin: -10px auto 15px;
             }
-            body.panel-is-open .map-ui-container { opacity: 0; pointer-events: none; }
-            body.panel-is-open .mobile-button-container { transform: translateY(100%); }
+
+            body.panel-is-open .map-ui-container {
+                opacity: 0;
+                pointer-events: none;
+            }
+            body.panel-is-open .mobile-button-container {
+                transform: translateY(100%);
+            }
         }
     </style>
 </head>
@@ -362,9 +371,6 @@
                     </button>
                 </div>
             </div>
-            
-            <div id="weather-forecast-results" class="results-section">
-                </div>
         </div>
     </div>
 
@@ -382,780 +388,692 @@
     // Nebraska sunrise/sunset chart data
     const sunData={"2025-09-01":{sunrise:"7:04",sunset:"8:08"},"2025-09-02":{sunrise:"7:05",sunset:"8:06"},"2025-09-03":{sunrise:"7:06",sunset:"8:05"},"2025-09-04":{sunrise:"7:07",sunset:"8:03"},"2025-09-05":{sunrise:"7:08",sunset:"8:01"},"2025-09-06":{sunrise:"7:09",sunset:"8:00"},"2025-09-07":{sunrise:"7:10",sunset:"7:58"},"2025-09-08":{sunrise:"7:11",sunset:"7:56"},"2025-09-09":{sunrise:"7:12",sunset:"7:55"},"2025-09-10":{sunrise:"7:12",sunset:"7:53"},"2025-09-11":{sunrise:"7:13",sunset:"7:51"},"2025-09-12":{sunrise:"7:14",sunset:"7:50"},"2025-09-13":{sunrise:"7:15",sunset:"7:48"},"2025-09-14":{sunrise:"7:16",sunset:"7:46"},"2025-09-15":{sunrise:"7:17",sunset:"7:45"},"2025-09-16":{sunrise:"7:18",sunset:"7:43"},"2025-09-17":{sunrise:"7:19",sunset:"7:41"},"2025-09-18":{sunrise:"7:20",sunset:"7:40"},"2025-09-19":{sunrise:"7:21",sunset:"7:38"},"2025-09-20":{sunrise:"7:22",sunset:"7:36"},"2025-09-21":{sunrise:"7:23",sunset:"7:34"},"2025-09-22":{sunrise:"7:24",sunset:"7:33"},"2025-09-23":{sunrise:"7:25",sunset:"7:31"},"2025-09-24":{sunrise:"7:26",sunset:"7:29"},"2025-09-25":{sunrise:"7:27",sunset:"7:28"},"2025-09-26":{sunrise:"7:28",sunset:"7:26"},"2025-09-27":{sunrise:"7:29",sunset:"7:24"},"2025-09-28":{sunrise:"7:30",sunset:"7:23"},"2025-09-29":{sunrise:"7:31",sunset:"7:21"},"2025-09-30":{sunrise:"7:32",sunset:"7:19"},"2025-10-01":{sunrise:"7:33",sunset:"7:18"},"2025-10-02":{sunrise:"7:34",sunset:"7:16"},"2025-10-03":{sunrise:"7:35",sunset:"7:14"},"2025-10-04":{sunrise:"7:36",sunset:"7:13"},"2025-10-05":{sunrise:"7:37",sunset:"7:11"},"2025-10-06":{sunrise:"7:38",sunset:"7:10"},"2025-10-07":{sunrise:"7:39",sunset:"7:08"},"2025-10-08":{sunrise:"7:40",sunset:"7:06"},"2025-10-09":{sunrise:"7:42",sunset:"7:05"},"2025-10-10":{sunrise:"7:43",sunset:"7:03"},"2025-10-11":{sunrise:"7:44",sunset:"7:02"},"2025-10-12":{sunrise:"7:45",sunset:"7:00"},"2025-10-13":{sunrise:"7:46",sunset:"6:59"},"2025-10-14":{sunrise:"7:47",sunset:"6:57"},"2025-10-15":{sunrise:"7:48",sunset:"6:55"},"2025-10-16":{sunrise:"7:49",sunset:"6:54"},"2025-10-17":{sunrise:"7:50",sunset:"6:52"},"2025-10-18":{sunrise:"7:51",sunset:"6:51"},"2025-10-19":{sunrise:"7:52",sunset:"6:50"},"2025-10-20":{sunrise:"7:53",sunset:"6:48"},"2025-10-21":{sunrise:"7:55",sunset:"6:47"},"2025-10-22":{sunrise:"7:56",sunset:"6:45"},"2025-10-23":{sunrise:"7:57",sunset:"6:44"},"2025-10-24":{sunrise:"7:58",sunset:"6:42"},"2025-10-25":{sunrise:"7:59",sunset:"6:41"},"2025-10-26":{sunrise:"8:00",sunset:"6:40"},"2025-10-27":{sunrise:"8:01",sunset:"6:38"},"2025-10-28":{sunrise:"8:02",sunset:"6:37"},"2025-10-29":{sunrise:"8:04",sunset:"6:36"},"2025-10-30":{sunrise:"8:05",sunset:"6:35"},"2025-10-31":{sunrise:"8:06",sunset:"6:33"},"2025-11-01":{sunrise:"8:07",sunset:"6:32"},"2025-11-02":{sunrise:"7:08",sunset:"5:31"},"2025-11-03":{sunrise:"7:09",sunset:"5:30"},"2025-11-04":{sunrise:"7:11",sunset:"5:29"},"2025-11-05":{sunrise:"7:12",sunset:"5:28"},"2025-11-06":{sunrise:"7:13",sunset:"5:27"},"2025-11-07":{sunrise:"7:14",sunset:"5:25"},"2025-11-08":{sunrise:"7:15",sunset:"5:24"},"2025-11-09":{sunrise:"7:16",sunset:"5:23"},"2025-11-10":{sunrise:"7:18",sunset:"5:22"},"2025-11-11":{sunrise:"7:19",sunset:"5:21"},"2025-11-12":{sunrise:"7:20",sunset:"5:21"},"2025-11-13":{sunrise:"7:21",sunset:"5:20"},"2025-11-14":{sunrise:"7:22",sunset:"5:19"},"2025-11-15":{sunrise:"7:24",sunset:"5:18"},"2025-11-16":{sunrise:"7:25",sunset:"5:17"},"2025-11-17":{sunrise:"7:26",sunset:"5:16"},"2025-11-18":{sunrise:"7:27",sunset:"5:16"},"2025-11-19":{sunrise:"7:28",sunset:"5:15"},"2025-11-20":{sunrise:"7:29",sunset:"5:14"},"2025-11-21":{sunrise:"7:30",sunset:"5:14"},"2025-11-22":{sunrise:"7:32",sunset:"5:13"},"2025-11-23":{sunrise:"7:33",sunset:"5:13"},"2025-11-24":{sunrise:"7:34",sunset:"5:12"},"2025-11-25":{sunrise:"7:35",sunset:"5:12"},"2025-11-26":{sunrise:"7:36",sunset:"5:11"},"2025-11-27":{sunrise:"7:37",sunset:"5:11"},"2025-11-28":{sunrise:"7:38",sunset:"5:10"},"2025-11-29":{sunrise:"7:39",sunset:"5:10"},"2025-11-30":{sunrise:"7:40",sunset:"5:10"},"2025-12-01":{sunrise:"7:41",sunset:"5:10"},"2025-12-02":{sunrise:"7:42",sunset:"5:09"},"2025-12-03":{sunrise:"7:43",sunset:"5:09"},"2025-12-04":{sunrise:"7:44",sunset:"5:09"},"2025-12-05":{sunrise:"7:45",sunset:"5:09"},"2025-12-06":{sunrise:"7:46",sunset:"5:09"},"2025-12-07":{sunrise:"7:47",sunset:"5:09"},"2025-12-08":{sunrise:"7:48",sunset:"5:09"},"2025-12-09":{sunrise:"7:49",sunset:"5:09"},"2025-12-10":{sunrise:"7:50",sunset:"5:09"},"2025-12-11":{sunrise:"7:50",sunset:"5:09"},"2025-12-12":{sunrise:"7:51",sunset:"5:09"},"2025-12-13":{sunrise:"7:52",sunset:"5:09"},"2025-12-14":{sunrise:"7:53",sunset:"5:10"},"2025-12-15":{sunrise:"7:53",sunset:"5:10"},"2025-12-16":{sunrise:"7:54",sunset:"5:10"},"2025-12-17":{sunrise:"7:55",sunset:"5:11"},"2025-12-18":{sunrise:"7:55",sunset:"5:11"},"2025-12-19":{sunrise:"7:56",sunset:"5:11"},"2025-12-20":{sunrise:"7:56",sunset:"5:12"},"2025-12-21":{sunrise:"7:57",sunset:"5:12"},"2025-12-22":{sunrise:"7:57",sunset:"5:13"},"2025-12-23":{sunrise:"7:58",sunset:"5:13"},"2025-12-24":{sunrise:"7:58",sunset:"5:14"},"2025-12-25":{sunrise:"7:59",sunset:"5:15"},"2025-12-26":{sunrise:"7:59",sunset:"5:15"},"2025-12-27":{sunrise:"7:59",sunset:"5:16"},"2025-12-28":{sunrise:"8:00",sunset:"5:17"},"2025-12-29":{sunrise:"8:00",sunset:"5:17"},"2025-12-30":{sunrise:"8:00",sunset:"5:18"},"2025-12-31":{sunrise:"8:00",sunset:"5:19"},"2026-01-01":{sunrise:"8:00",sunset:"5:20"},"2026-01-02":{sunrise:"8:00",sunset:"5:21"},"2026-01-03":{sunrise:"8:00",sunset:"5:22"},"2026-01-04":{sunrise:"8:00",sunset:"5:23"},"2026-01-05":{sunrise:"8:00",sunset:"5:23"},"2026-01-06":{sunrise:"8:00",sunset:"5:24"},"2026-01-07":{sunrise:"8:00",sunset:"5:25"},"2026-01-08":{sunrise:"8:00",sunset:"5:26"},"2026-01-09":{sunrise:"8:00",sunset:"5:27"},"2026-01-10":{sunrise:"8:00",sunset:"5:28"},"2026-01-11":{sunrise:"7:59",sunset:"5:29"},"2026-01-12":{sunrise:"7:59",sunset:"5:31"},"2026-01-13":{sunrise:"7:59",sunset:"5:32"},"2026-01-14":{sunrise:"7:58",sunset:"5:33"},"2026-01-15":{sunrise:"7:58",sunset:"5:34"},"2026-01-16":{sunrise:"7:58",sunset:"5:35"},"2026-01-17":{sunrise:"7:57",sunset:"5:36"},"2026-01-18":{sunrise:"7:57",sunset:"5:37"},"2026-01-19":{sunrise:"7:56",sunset:"5:38"},"2026-01-20":{sunrise:"7:56",sunset:"5:40"},"2026-01-21":{sunrise:"7:55",sunset:"5:41"},"2026-01-22":{sunrise:"7:54",sunset:"5:42"},"2026-01-23":{sunrise:"7:54",sunset:"5:43"},"2026-01-24":{sunrise:"7:53",sunset:"5:44"},"2026-01-25":{sunrise:"7:52",sunset:"5:46"},"2026-01-26":{sunrise:"7:51",sunset:"5:47"},"2026-01-27":{sunrise:"7:51",sunset:"5:48"},"2026-01-28":{sunrise:"7:50",sunset:"5:49"},"2026-01-29":{sunrise:"7:49",sunset:"5:51"},"2026-01-30":{sunrise:"7:48",sunset:"5:52"},"2026-01-31":{sunrise:"7:47",sunset:"5:53"},"2026-02-01":{sunrise:"7:46",sunset:"5:54"},"2026-02-02":{sunrise:"7:45",sunset:"5:55"},"2026-02-03":{sunrise:"7:44",sunset:"5:57"},"2026-02-04":{sunrise:"7:43",sunset:"5:58"},"2026-02-05":{sunrise:"7:42",sunset:"5:59"},"2026-02-06":{sunrise:"7:41",sunset:"6:00"},"2026-02-07":{sunrise:"7:40",sunset:"6:02"},"2026-02-08":{sunrise:"7:39",sunset:"6:03"},"2026-02-09":{sunrise:"7:37",sunset:"6:04"},"2026-02-10":{sunrise:"7:36",sunset:"6:05"},"2026-02-11":{sunrise:"7:35",sunset:"6:06"},"2026-02-12":{sunrise:"7:34",sunset:"6:08"},"2026-02-13":{sunrise:"7:33",sunset:"6:09"},"2026-02-14":{sunrise:"7:31",sunset:"6:10"},"2026-02-15":{sunrise:"7:30",sunset:"6:11"},"2026-02-16":{sunrise:"7:29",sunset:"6:13"},"2026-02-17":{sunrise:"7:27",sunset:"6:14"},"2026-02-18":{sunrise:"7:26",sunset:"6:15"},"2026-02-19":{sunrise:"7:25",sunset:"6:16"},"2026-02-20":{sunrise:"7:23",sunset:"6:17"},"2026-02-21":{sunrise:"7:22",sunset:"6:18"},"2026-02-22":{sunrise:"7:20",sunset:"6:20"},"2026-02-23":{sunrise:"7:19",sunset:"6:21"},"2026-02-24":{sunrise:"7:17",sunset:"6:22"},"2026-02-25":{sunrise:"7:16",sunset:"6:23"},"2026-02-26":{sunrise:"7:15",sunset:"6:24"},"2026-02-27":{sunrise:"7:13",sunset:"6:25"},"2026-02-28":{sunrise:"7:12",sunset:"6:27"}};
 
-    // --- App State & Variables ---
-    let map, currentMarker, startLocationMarker, infoWindow, directionsService, directionsRenderer;
-    let startLocation = null;
-    let huntLocation = null;
-    let isLocationSet = false;
-    let baseDriveTime = 0;
-    let driveTimeAdjustment = 0;
-    let selectedGameType = 'deer';
-    let alternateRoutePolylines = [];
-    let fullDirectionsResponse = null;
-    let locationAccessDenied = false;
-    let currentState = null;
+    // --- App State & Variables ---
+    let map, currentMarker, startLocationMarker, infoWindow, directionsService, directionsRenderer;
+    let startLocation = null;
+    let huntLocation = null;
+    let isLocationSet = false;
+    let baseDriveTime = 0;
+    let driveTimeAdjustment = 0;
+    let selectedGameType = 'deer';
+    let alternateRoutePolylines = [];
+    let fullDirectionsResponse = null;
+    let locationAccessDenied = false;
+    let currentState = null;
 
-    // TZ UPGRADE: Add state variables for time zone information
-    let startZoneInfo = { id: null, abbreviation: null };
-    let huntZoneInfo = { id: null, abbreviation: null };
-    // FINAL FIX: This is the separate, unrestricted key for the Time Zone API service.
-    const TIMEZONE_API_KEY = 'AIzaSyCT9XxjxT5t4Wyjwg0_s2drfClF_TijOLQ';
+    // TZ UPGRADE: Add state variables for time zone information
+    let startZoneInfo = { id: null, abbreviation: null };
+    let huntZoneInfo = { id: null, abbreviation: null };
+    // FINAL FIX: This is the separate, unrestricted key for the Time Zone API service.
+    const TIMEZONE_API_KEY = 'AIzaSyCT9XxjxT5t4Wyjwg0_s2drfClF_TijOLQ';
 
 
-    function initMap() {
-        // Expanded bounds to include NE, IA, WY, KS
-        const defaultLocation = { lat: 41.5, lng: -99.5 };
-        map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 6, 
-            center: defaultLocation, 
-            mapTypeId: 'hybrid', 
-            gestureHandling: 'greedy',
-            restriction: { 
-                latLngBounds: { 
-                    north: 45.0,   // North enough for Wyoming
-                    south: 37.0,   // South enough for Kansas
-                    west: -106.0,  // West enough for Wyoming
-                    east: -90.0    // East enough for Iowa
-                }, 
-                strictBounds: false 
-            },
-            mapTypeControl: false, 
-            streetViewControl: false, 
-            zoomControl: true, 
-            scaleControl: true, 
-            rotateControl: false, 
-            fullscreenControl: true
-        });
+    function initMap() {
+        // Expanded bounds to include NE, IA, WY, KS
+        const defaultLocation = { lat: 41.5, lng: -99.5 };
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 6, 
+            center: defaultLocation, 
+            mapTypeId: 'hybrid', 
+            gestureHandling: 'greedy',
+            restriction: { 
+                latLngBounds: { 
+                    north: 45.0,   // North enough for Wyoming
+                    south: 37.0,   // South enough for Kansas
+                    west: -106.0,  // West enough for Wyoming
+                    east: -90.0    // East enough for Iowa
+                }, 
+                strictBounds: false 
+            },
+            mapTypeControl: false, 
+            streetViewControl: false, 
+            zoomControl: true, 
+            scaleControl: true, 
+            rotateControl: false, 
+            fullscreenControl: true
+        });
 
-        const locationButton = document.createElement("button");
-        locationButton.textContent = "My Location";
-        locationButton.classList.add("custom-map-control-button");
-        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(locationButton);
+        const locationButton = document.createElement("button");
+        locationButton.textContent = "My Location";
+        locationButton.classList.add("custom-map-control-button");
+        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(locationButton);
 
-        locationButton.addEventListener("click", () => {
-            if (startLocation) {
-                map.setCenter(startLocation);
-                map.setZoom(12);
-            } else if (locationAccessDenied) {
-                alert("Location access was denied. Please enable location in your browser settings.");
-            } else {
-                tryGeolocation();
-            }
-        });
-
-        directionsRenderer = new google.maps.DirectionsRenderer({
-            suppressMarkers: true,
-            polylineOptions: { strokeColor: '#4CAF50', strokeWeight: 8, strokeOpacity: 0.9 }
-        });
-        directionsRenderer.setMap(map);
-
-        infoWindow = new google.maps.InfoWindow();
-        directionsService = new google.maps.DirectionsService();
-
-        const searchInput = document.getElementById("search-input");
-        const searchBox = new google.maps.places.SearchBox(searchInput);
-
-        map.addListener("bounds_changed", () => searchBox.setBounds(map.getBounds()));
-
-        searchBox.addListener("places_changed", () => {
-            const places = searchBox.getPlaces();
-            if (places.length > 0) placeMarker(places[0].geometry.location);
-        });
-
-        map.addListener("click", (e) => placeMarker(e.latLng));
-
-        addEventListeners();
-        setTodaysDate();
-        tryGeolocation();
-        // TZ UPGRADE: Determine the user's starting time zone from their browser.
-        setStartZone();
-    }
-
-    function addEventListeners() {
-        document.getElementById('latLngInput').addEventListener('change', handleLatLngInput);
-        document.getElementById('huntDate').addEventListener('change', updateCalculateButton);
-        document.getElementById('calculateButton').addEventListener('click', calculateTimeline);
-        
-        // Panel visibility controls
-        document.getElementById('mobileToggle').addEventListener('click', () => {
-            const isPanelOpen = document.getElementById('controlsPanel').classList.contains('show');
-            setPanelVisibility(!isPanelOpen);
-        });
-        document.getElementById('panelClose').addEventListener('click', () => setPanelVisibility(false));
-
-        document.querySelectorAll('.game-type-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.game-type-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                selectedGameType = this.dataset.type;
-            });
-        });
-        
-        document.querySelectorAll('.time-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const amount = parseInt(this.dataset.adjust, 10);
-                adjustDriveTime(amount);
-            });
-        });
-    }
-    
-    function setPanelVisibility(show) {
-        const controlsPanel = document.getElementById('controlsPanel');
-        const mobileToggle = document.getElementById('mobileToggle');
-        
-        controlsPanel.classList.toggle('show', show);
-        document.body.classList.toggle('panel-is-open', show);
-
-        const buttonText = isLocationSet ? 'Plan Your Hunt' : 'Select Hunt Location';
-        mobileToggle.textContent = show ? 'Close' : buttonText;
-    }
-
-    function tryGeolocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
-                    startLocation = userCoords;
-                    if (startLocationMarker) {
-                        startLocationMarker.setPosition(userCoords);
-                    } else {
-                        startLocationMarker = new google.maps.Marker({
-                            position: startLocation, map: map, title: "Your Start Location",
-                            icon: {
-                                path: google.maps.SymbolPath.CIRCLE, scale: 10,
-                                fillColor: "#4CAF50", fillOpacity: 1,
-                                strokeWeight: 2, strokeColor: "#ffffff"
-                            },
-                        });
-                    }
-                    map.setCenter(userCoords);
-                    map.setZoom(10);
-                    updateDriveTimeStatus('Your location found. Select a hunting spot.', 'ready');
-                    locationAccessDenied = false;
-                    if (isLocationSet && currentMarker) {
-                        calculateAndDisplayRoute(currentMarker.getPosition());
-                    }
-                },
-                (error) => {
-                    locationAccessDenied = true;
-                    let message = 'Could not get your location.';
-                    if (error.code === error.PERMISSION_DENIED) message = 'Location access denied. Drive time calculation disabled.';
-                    else if (error.code === error.POSITION_UNAVAILABLE) message = 'Location information unavailable.';
-                    else if (error.code === error.TIMEOUT) message = 'Location request timed out.';
-                    updateDriveTimeStatus(message, 'error');
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        } else {
-            updateDriveTimeStatus('Geolocation is not supported by your browser.', 'error');
-        }
-    }
-
-    function handleLatLngInput() {
-        const coords = this.value.trim().split(',').map(c => parseFloat(c.trim()));
-        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-            placeMarker(new google.maps.LatLng(coords[0], coords[1]));
-        }
-    }
-
-    function detectState(lat, lng) {
-        // Simplified state detection based on coordinates
-        // Nebraska boundaries approximately
-        if (lat >= 40.0 && lat <= 43.0 && lng >= -104.05 && lng <= -95.3) {
-            return 'NE';
-        }
-        // Iowa boundaries approximately
-        else if (lat >= 40.36 && lat <= 43.5 && lng >= -96.64 && lng <= -90.14) {
-            return 'IA';
-        }
-        // Kansas boundaries approximately
-        else if (lat >= 37.0 && lat <= 40.0 && lng >= -102.05 && lng <= -94.58) {
-            return 'KS';
-        }
-        // Wyoming boundaries approximately
-        else if (lat >= 41.0 && lat <= 45.0 && lng >= -111.05 && lng <= -104.05) {
-            return 'WY';
-        }
-        return null;
-    }
-
-    async function placeMarker(location) { // TZ UPGRADE: Made function async to await time zone lookup
-        const lat = location.lat();
-        const lng = location.lng();
-        
-        // Detect which state we're in
-        currentState = detectState(lat, lng);
-        updateStateBadge(currentState);
-        
-        // TZ UPGRADE: Get time zone for the selected hunting location
-        await getHuntZone(lat, lng);
-
-        updateLatLngInput(location);
-        isLocationSet = true;
-        updateCalculateButton();
-        
-        const mobileToggle = document.getElementById('mobileToggle');
-        mobileToggle.classList.remove('initial');
-        if (!document.getElementById('controlsPanel').classList.contains('show')) {
-             mobileToggle.textContent = 'Plan Your Hunt';
-        }
-
-        if (currentMarker) {
-            currentMarker.setPosition(location);
-        } else {
-            currentMarker = new google.maps.Marker({
-                position: location, map: map, draggable: true, title: 'Hunting Location',
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE, scale: 12,
-                    fillColor: "#FFBF00", fillOpacity: 0.9,
-                    strokeWeight: 3, strokeColor: "#fff"
-                }
-            });
-            currentMarker.addListener('dragend', (e) => placeMarker(e.latLng));
-        }
-        calculateAndDisplayRoute(location);
-    }
-
-    function updateStateBadge(state) {
-        const badge = document.getElementById('stateBadge');
-        if (state) {
-            badge.textContent = state;
-            badge.style.display = 'inline-block';
-        } else {
-            badge.style.display = 'none';
-        }
-    }
-
-    function calculateAndDisplayRoute(destination) {
-        if (!startLocation) {
-            updateDriveTimeStatus("Cannot calculate route without your start location.", "error");
-            return;
-        }
-        updateDriveTimeStatus("Calculating route...", "calculating");
-        clearRoutes();
-        directionsService.route({
-            origin: startLocation,
-            destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING,
-            provideRouteAlternatives: true
-        }, (response, status) => {
-            if (status === "OK") {
-                fullDirectionsResponse = response;
-                directionsRenderer.setDirections(response);
-                const bounds = new google.maps.LatLngBounds();
-                response.routes[0].overview_path.forEach(point => bounds.extend(point));
-                map.fitBounds(bounds);
-                showRouteOptions(response.routes);
-                updateDriveTimeStatus(`${response.routes.length} route(s) found. Choose one below.`, "ready");
-            } else {
-                updateDriveTimeStatus('Could not calculate drive time. Check connection.', 'error');
-            }
-        });
-    }
-
-    function showRouteOptions(routes) {
-        const routesList = document.getElementById('routesList');
-        routesList.innerHTML = '';
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-
-        for (let i = 1; i < routes.length; i++) {
-            const polyline = new google.maps.Polyline({
-                path: routes[i].overview_path, strokeColor: '#888888',
-                strokeOpacity: 0.6, strokeWeight: 6, map: map
-            });
-            alternateRoutePolylines.push(polyline);
-        }
-
-        routes.forEach((route, index) => {
-            const routeDiv = document.createElement('div');
-            routeDiv.className = 'route-option';
-            if (index === 0) routeDiv.classList.add('selected');
-            const duration = Math.round(route.legs[0].duration.value / 60);
-            const distance = route.legs[0].distance.text;
-            const summary = route.summary || 'Main route';
-            routeDiv.innerHTML = `
-                <div class="route-summary">
-                    <div class="route-time">${duration} min</div>
-                    <div class="route-distance">${distance}</div>
-                </div>
-                <div class="route-description">via ${summary}</div>`;
-            routeDiv.addEventListener('click', () => {
-                selectRoute(index);
-                document.querySelectorAll('.route-option').forEach(r => r.classList.remove('selected'));
-                routeDiv.classList.add('selected');
-            });
-            routesList.appendChild(routeDiv);
-        });
-
-        if (routes.length > 0) {
-            updateDriveTime(routes[0]);
-            document.getElementById('routeOptions').classList.add('show');
-            document.getElementById('driveTimeAdjuster').classList.add('show');
-        }
-    }
-
-    function selectRoute(index) {
-        directionsRenderer.setRouteIndex(index);
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-        for (let i = 0; i < fullDirectionsResponse.routes.length; i++) {
-            if (i !== index) {
-                const polyline = new google.maps.Polyline({
-                    path: fullDirectionsResponse.routes[i].overview_path,
-                    strokeColor: '#888888', strokeOpacity: 0.6,
-                    strokeWeight: 6, map: map
-                });
-                alternateRoutePolylines.push(polyline);
-            }
-        }
-        updateDriveTime(fullDirectionsResponse.routes[index]);
-    }
-
-    function updateDriveTime(route) {
-        baseDriveTime = Math.round(route.legs[0].duration.value / 60);
-        driveTimeAdjustment = 0;
-        const totalTime = baseDriveTime + driveTimeAdjustment;
-        document.getElementById('driveTime').value = totalTime;
-        document.getElementById('adjustedTime').textContent = totalTime;
-    }
-    
-    function adjustDriveTime(minutes) {
-        driveTimeAdjustment += minutes;
-        const totalTime = Math.max(0, baseDriveTime + driveTimeAdjustment);
-        document.getElementById('adjustedTime').textContent = totalTime;
-        document.getElementById('driveTime').value = totalTime;
-    }
-
-    function clearRoutes() {
-        if (directionsRenderer) directionsRenderer.setDirections({routes: []});
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-        document.getElementById('routeOptions').classList.remove('show');
-        document.getElementById('driveTimeAdjuster').classList.remove('show');
-    }
-
-    async function getSunriseSunsetForLocation(lat, lng, date) {
-        // Using sunrise-sunset.org API which returns UTC times
-        const url = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&date=${date}&formatted=0`;
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.status === 'OK') {
-                // TZ UPGRADE: Return the raw UTC ISO strings. Conversion will happen later.
-                return {
-                    sunrise: data.results.sunrise,
-                    sunset: data.results.sunset
-                };
-            }
-        } catch (error) {
-            console.error('Error fetching sunrise/sunset:', error);
-        }
-        return null;
-    }
-
-    async function calculateTimeline() {
-        const button = document.getElementById('calculateButton');
-        const buttonText = document.getElementById('buttonText');
-        const spinner = document.getElementById('buttonSpinner');
-        button.disabled = true;
-        buttonText.textContent = 'Calculating...';
-        spinner.style.display = 'inline-block';
-
-        // Clear previous weather results
-        const weatherSection = document.getElementById('weather-forecast-results');
-        weatherSection.innerHTML = '';
-        weatherSection.style.display = 'none';
-
-        const huntDateInput = document.getElementById('huntDate').value;
-        if (!huntDateInput || !huntLocation || !huntZoneInfo.id) {
-             alert('Please ensure location is set and time zone has been found.');
-            resetButton();
-            return;
-        }
-
-        let sunInfo = null;
-        let adjustedSunrise, adjustedSunset;
-        let calcText = '';
-
-        if (currentState === 'NE' && sunData[huntDateInput]) {
-            sunInfo = sunData[huntDateInput];
-            let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number);
-            if (sunsetHour < 12) sunsetHour += 12; // PM correction
-            const correctedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`;
-
-            const locationInfo = calculateDistanceFromKearney(huntLocation.lat, huntLocation.lng);
-            const timeAdjustmentMinutes = Math.round(locationInfo.distance / MILES_PER_MINUTE);
-            const actualAdjustment = locationInfo.direction === 'East' ? -timeAdjustmentMinutes : timeAdjustmentMinutes;
-            calcText = `${locationInfo.distance.toFixed(1)} miles ${locationInfo.direction} of Kearney ÷ ${MILES_PER_MINUTE} = ${timeAdjustmentMinutes} min adjustment`;
-
-            adjustedSunrise = adjustTime(sunInfo.sunrise, actualAdjustment);
-            adjustedSunset = adjustTime(correctedSunset, actualAdjustment);
-            
-            // TZ UPGRADE: Apply -1 hour adjustment if hunting in MT, as per NE regulations.
-            if (huntZoneInfo.abbreviation.startsWith('M')) {
-                adjustedSunrise = adjustTime(adjustedSunrise, -60);
-                adjustedSunset = adjustTime(adjustedSunset, -60);
-                calcText += ' (-1hr for MT)';
-            }
-
-        } else {
-            const apiSunData = await getSunriseSunsetForLocation(huntLocation.lat, huntLocation.lng, huntDateInput);
-            if (apiSunData) {
-                // TZ UPGRADE: Convert UTC times from API to the local time of the hunting spot.
-                const sunriseUtcDate = new Date(apiSunData.sunrise);
-                const sunsetUtcDate = new Date(apiSunData.sunset);
-                adjustedSunrise = formatUtcDateToTime(sunriseUtcDate, huntZoneInfo.id);
-                adjustedSunset = formatUtcDateToTime(sunsetUtcDate, huntZoneInfo.id);
-                sunInfo = { sunrise: adjustedSunrise, sunset: adjustedSunset };
-                calcText = `Astronomically accurate for lat/lng in ${huntZoneInfo.abbreviation}.`;
-            } else {
-                alert('Could not fetch sunrise/sunset data. Please check your connection.');
-                resetButton();
-                return;
-            }
-        }
-
-        const legalShootingTime = adjustTime(adjustedSunrise, -30);
-        const endLegalShooting = (selectedGameType === 'deer') ? adjustTime(adjustedSunset, 30) : adjustedSunset;
-
-        // TZ UPGRADE: Perform all timeline calculations using absolute Date objects to handle time zones correctly.
-        const driveTime = parseInt(document.getElementById('driveTime').value) || 0;
-        const bufferTime = parseInt(document.getElementById('bufferTime').value) || 0;
-        const parkToSetTime = parseInt(document.getElementById('parkToSetTime').value) || 0;
-        const setToEstablishTime = parseInt(document.getElementById('setToEstablishTime').value) || 0;
-
-        // 1. Get a reliable Date object for the legal shooting time in the hunt time zone.
-        const huntZoneOffset = getUtcOffsetString(huntZoneInfo.id, huntDateInput);
-        const legalShootingIso = `${huntDateInput}T${legalShootingTime}:00${huntZoneOffset}`;
-        const legalShootingDate = new Date(legalShootingIso);
-        
-        // 2. Create other Date objects by subtracting minutes (as milliseconds).
-        const establishedByDate = new Date(legalShootingDate.getTime() - (bufferTime * 60000));
-        const setByDate = new Date(establishedByDate.getTime() - (setToEstablishTime * 60000));
-        const parkedByDate = new Date(setByDate.getTime() - (parkToSetTime * 60000));
-        const leaveByDate = new Date(parkedByDate.getTime() - (driveTime * 60000));
-        const endLegalShootingDate = new Date(`${huntDateInput}T${endLegalShooting}:00${huntZoneOffset}`);
-        
-        // 3. Format these dates into strings for display, using the correct time zone for each.
-        const leaveByStr = formatDateToTimeAmPm(leaveByDate, startZoneInfo.id, startZoneInfo.abbreviation);
-        const parkedByStr = formatDateToTimeAmPm(parkedByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
-        const setByStr = formatDateToTimeAmPm(setByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
-        const establishedByStr = formatDateToTimeAmPm(establishedByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
-        const legalShootingStr = formatDateToTimeAmPm(legalShootingDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
-        const endLegalShootingStr = formatDateToTimeAmPm(endLegalShootingDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
-        
-        document.getElementById('timeline-results').innerHTML = `<div class="timeline">
-            <div class="timeline-item highlight"><div class="timeline-label">Leave By</div><div class="timeline-time">${leaveByStr}</div></div>
-            <div class="timeline-item"><div class="timeline-label">Parked By</div><div class="timeline-time">${parkedByStr}</div></div>
-            <div class="timeline-item"><div class="timeline-label">At Stand/Blind</div><div class="timeline-time">${setByStr}</div></div>
-            <div class="timeline-item"><div class="timeline-label">Established By</div><div class="timeline-time">${establishedByStr}</div></div>
-            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Begins</div><div class="timeline-time">${legalShootingStr}</div></div>
-            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Ends</div><div class="timeline-time">${endLegalShootingStr}</div></div>
-        </div>`;
-
-        let infoGridHTML = `<div class="info-grid">`;
-        const adjustedSunriseStr = formatDateToTimeAmPm(new Date(`${huntDateInput}T${adjustedSunrise}:00${huntZoneOffset}`), huntZoneInfo.id, huntZoneInfo.abbreviation);
-        const adjustedSunsetStr = formatDateToTimeAmPm(new Date(`${huntDateInput}T${adjustedSunset}:00${huntZoneOffset}`), huntZoneInfo.id, huntZoneInfo.abbreviation);
-
-        if (currentState === 'NE') {
-             const chartSunriseStr = formatTimeAMPM(sunInfo.sunrise, 'CT');
-             const chartSunsetStr = formatTimeAMPM(sunInfo.sunset, 'CT', true); // Add PM correction
-             infoGridHTML += `
-                <div class="info-item"><div class="info-label">Chart Sunrise</div><div class="info-value">${chartSunriseStr}</div></div>
-                <div class="info-item"><div class="info-label">Chart Sunset</div><div class="info-value">${chartSunsetStr}</div></div>
-                <div class="info-item"><div class="info-label">Adjusted Sunrise</div><div class="info-value">${adjustedSunriseStr}</div><div class="info-calc">${calcText}<br/><a href="http://digital.outdoornebraska.gov/i/1537408-small-game-and-waterfowl-guide-2025-26-web/39" target="_blank">Pg. 40 2025 Waterfowl Guide</a></div></div>
-                <div class="info-item"><div class="info-label">Adjusted Sunset</div><div class="info-value">${adjustedSunsetStr}</div><div class="info-calc">${calcText}</div></div>`;
-        } else {
-            infoGridHTML += `
-                <div class="info-item"><div class="info-label">Location Sunrise</div><div class="info-value">${adjustedSunriseStr}</div></div>
-                <div class="info-item"><div class="info-label">Location Sunset</div><div class="info-value">${adjustedSunsetStr}</div></div>
-                <div class="info-item"><div class="info-label">State</div><div class="info-value">${currentState || 'Unknown'}</div><div class="info-calc">${calcText}</div></div>
-                <div class="info-item"><div class="info-label">Legal Hours</div><div class="info-value">${selectedGameType === 'deer' ? '30 min before sunrise to 30 min after sunset' : '30 min before sunrise to sunset'}</div></div>`;
-        }
-        
-        infoGridHTML += `
-            <div class="info-item"><div class="info-label">Game Type</div><div class="info-value">${selectedGameType === 'deer' ? 'Deer' : 'Waterfowl'}</div></div>
-            <div class="info-item"><div class="info-label">Total Drive Time</div><div class="info-value">${driveTime} minutes</div></div>
-        </div>`;
-        
-        document.getElementById('info-grid-results').innerHTML = infoGridHTML;
-        document.getElementById('resultsSection').classList.add('show');
-        
-        // --- WEATHER ADDITION: Start weather forecast logic ---
-        const forecastList = await getWeatherForecast(huntLocation.lat, huntLocation.lng);
-
-        if (forecastList) {
-            const forecastHours = [0, 2, 4, 6, 8, 10, 12];
-            const targetDates = forecastHours.map(h => new Date(legalShootingDate.getTime() + h * 3600 * 1000));
-            
-            let weatherHtml = `
-                <div class="step-header">
-                    <div class="step-number" style="font-size: 1.5rem;">༄</div>
-                    <div class="step-title">Wind Forecast</div>
-                </div>
-                <div class="weather-forecast-container">`;
-
-            for (const targetDate of targetDates) {
-                const bestForecast = findClosestForecast(targetDate, forecastList);
-                if (bestForecast) {
-                    const timeStr = targetDate.toLocaleTimeString('en-US', { timeZone: huntZoneInfo.id, hour: 'numeric', minute: '2-digit', hour12: true });
-                    const deg = bestForecast.wind.deg;
-                    const speedMps = bestForecast.wind.speed;
-                    const speedMph = Math.round(speedMps * 2.237);
-                    const direction = degreesToCardinal(deg);
-                    
-                    weatherHtml += `
-                        <div class="weather-card">
-                            <div class="weather-time">${timeStr}</div>
-                            <div class="weather-wind-info">${direction} Wind</div>
-                            <div class="weather-arrow" style="transform: rotate(${deg}deg);">↓</div>
-                            <div class="weather-speed">${speedMph} MPH</div>
-                        </div>`;
-                }
+        locationButton.addEventListener("click", () => {
+            if (startLocation) {
+                map.setCenter(startLocation);
+                map.setZoom(12);
+            } else if (locationAccessDenied) {
+                alert("Location access was denied. Please enable location in your browser settings.");
+            } else {
+                tryGeolocation();
             }
-            weatherHtml += '</div>';
-            
-            weatherSection.innerHTML = weatherHtml;
-            weatherSection.style.display = 'block';
-        }
-        // --- End of Weather Addition ---
-        
-        const copyText = `Hunt Plan for ${huntDateInput} in ${currentState || 'location'} (${selectedGameType}):\n\nLeave by: ${leaveByStr}\nParked by: ${parkedByStr}\nAt stand/blind: ${setByStr}\nEstablished: ${establishedByStr}\n\nLegal Shooting: ${legalShootingStr} - ${endLegalShootingStr}\n\nDrive: ${driveTime}m, Walk: ${parkToSetTime}m, Setup: ${setToEstablishTime}m`;
-        
-        document.getElementById('copyButton').onclick = function() {
-            navigator.clipboard.writeText(copyText).then(() => {
-                const btn = this;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = 'Copied! ✓';
-                setTimeout(() => { btn.innerHTML = originalText; }, 2000);
-            }).catch(err => { alert('Failed to copy. Please try again.'); });
-        };
+        });
 
-        document.getElementById('step1').classList.remove('highlight-input');
-        resetButton();
-    }
+        directionsRenderer = new google.maps.DirectionsRenderer({
+            suppressMarkers: true,
+            polylineOptions: { strokeColor: '#4CAF50', strokeWeight: 8, strokeOpacity: 0.9 }
+        });
+        directionsRenderer.setMap(map);
 
-    // --- Helper & Utility Functions ---
+        infoWindow = new google.maps.InfoWindow();
+        directionsService = new google.maps.DirectionsService();
 
-    // TZ UPGRADE: Sets the starting time zone based on the user's browser.
-    function setStartZone() {
-        const userTimeZoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        startZoneInfo.id = userTimeZoneId;
-        startZoneInfo.abbreviation = getAbbreviation(userTimeZoneId);
-    }
+        const searchInput = document.getElementById("search-input");
+        const searchBox = new google.maps.places.SearchBox(searchInput);
 
-    // TZ UPGRADE: Gets time zone info for the hunting location from Google's API.
-    async function getHuntZone(lat, lng) {
-        // Use a timestamp for the selected hunt date to get correct DST info.
-        const huntDate = document.getElementById('huntDate').value;
-        const timestamp = new Date(huntDate + 'T12:00:00').getTime() / 1000;
-        
-        // FINAL FIX: This URL now uses the dedicated TIMEZONE_API_KEY
-        const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${TIMEZONE_API_KEY}`;
-        
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.status === 'OK') {
-                huntZoneInfo.id = data.timeZoneId;
-                huntZoneInfo.abbreviation = getAbbreviation(data.timeZoneId, new Date(timestamp * 1000));
-                updateLocationStatus(`Location set in ${huntZoneInfo.abbreviation} time zone.`, 'ready');
-            } else {
-                huntZoneInfo = { id: null, abbreviation: null }; // Reset on failure
-                updateLocationStatus(`Error: Could not determine time zone. ${data.errorMessage || ''}`, 'error');
-                console.error("Time Zone API Error:", data.errorMessage);
-            }
-        } catch (error) {
-            huntZoneInfo = { id: null, abbreviation: null }; // Reset on failure
-            updateLocationStatus(`Error: Time zone request failed.`, 'error');
-            console.error('Fetch error for Time Zone API:', error);
-        }
-    }
-    
-    // TZ UPGRADE: Reliably gets a time zone abbreviation (e.g., 'CDT', 'MST') for any IANA time zone ID.
-    function getAbbreviation(timeZoneId, date = new Date()) {
-        const parts = new Intl.DateTimeFormat('en-us', {
-            timeZone: timeZoneId,
-            timeZoneName: 'short',
-        }).formatToParts(date);
-        return parts.find(p => p.type === 'timeZoneName')?.value || '';
-    }
-    
-    // TZ UPGRADE: Gets the UTC offset string (e.g., "-05:00") needed to create absolute Date objects.
-    function getUtcOffsetString(timeZone, dateStr) {
-        const date = new Date(dateStr + 'T12:00:00'); // Use midday to avoid DST crossover issues
-        const parts = new Intl.DateTimeFormat('en-US', {
-            timeZone,
-            timeZoneName: 'longOffset'
-        }).formatToParts(date);
-        const offsetPart = parts.find(p => p.type === 'timeZoneName');
-        return offsetPart ? offsetPart.value.replace('GMT', '') : '+00:00';
-    }
-    
-    // TZ UPGRADE: Formats a UTC Date object into a time string for a specified time zone.
-    function formatUtcDateToTime(dateObj, timeZoneId) {
-        const timeString = dateObj.toLocaleTimeString('en-US', {
-            timeZone: timeZoneId,
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-        });
-        // Handles edge case where midnight is "24:00"
-        return timeString.replace('24:', '00:');
-    }
+        map.addListener("bounds_changed", () => searchBox.setBounds(map.getBounds()));
 
-    // TZ UPGRADE: Formats a Date object to an AM/PM time string with a time zone label.
-    function formatDateToTimeAmPm(dateObj, timeZoneId, abbreviation) {
-        if (!dateObj || isNaN(dateObj)) return 'Invalid Time';
-        const formattedTime = dateObj.toLocaleTimeString('en-US', {
-            timeZone: timeZoneId,
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-        });
-        return `${formattedTime} (${abbreviation})`;
-    }
+        searchBox.addListener("places_changed", () => {
+            const places = searchBox.getPlaces();
+            if (places.length > 0) placeMarker(places[0].geometry.location);
+        });
 
+        map.addListener("click", (e) => placeMarker(e.latLng));
 
-    function updateDriveTimeStatus(message, type) {
-        const statusEl = document.getElementById('driveTimeStatus');
-        statusEl.className = `status-indicator status-${type}`;
-        statusEl.textContent = message;
-    }
-
-    function updateLocationStatus(message, type = 'waiting') {
-        const statusEl = document.getElementById('locationStatus');
-        statusEl.className = `status-indicator status-${type}`;
-        statusEl.textContent = message;
-    }
-
-    function updateCalculateButton() {
-        const button = document.getElementById('calculateButton');
-        const buttonText = document.getElementById('buttonText');
-        const huntDate = document.getElementById('huntDate').value;
-        if (isLocationSet && huntDate && huntZoneInfo.id) {
-            button.disabled = false;
-            buttonText.textContent = 'Calculate Timeline';
-        } else if (!huntDate) {
-            button.disabled = true;
-            buttonText.textContent = 'Select Hunt Date';
-        } else if (!huntZoneInfo.id) {
-             button.disabled = true;
-             buttonText.textContent = 'Finding Time Zone...';
-        } else {
-            button.disabled = true;
-            buttonText.textContent = 'Set Location First';
-        }
-    }
-
-    function adjustTime(time, minutes) {
-        const today = new Date();
-        const [hour, min] = time.split(':').map(Number);
-        const timeDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour, min);
-        timeDate.setMinutes(timeDate.getMinutes() + minutes);
-        const h = String(timeDate.getHours()).padStart(2, '0');
-        const m = String(timeDate.getMinutes()).padStart(2, '0');
-        return `${h}:${m}`;
-    }
-
-    function updateLatLngInput(location) {
-        document.getElementById('latLngInput').value = `${location.lat().toFixed(6)}, ${location.lng().toFixed(6)}`;
-        huntLocation = { lat: location.lat(), lng: location.lng() };
-    }
-
-    function resetButton() {
-        const button = document.getElementById('calculateButton');
-        const spinner = document.getElementById('buttonSpinner');
-        button.disabled = false;
-        spinner.style.display = 'none';
-        updateCalculateButton();
-    }
-
-    function setTodaysDate() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        document.getElementById('huntDate').value = `${yyyy}-${mm}-${dd}`;
-        updateCalculateButton();
-    }
-    
-    function formatTimeAMPM(time24, zoneLabel, correctPM = false) {
-        if (!time24) return '';
-        let [hours, minutes] = time24.split(':');
-        let h = parseInt(hours, 10);
-
-        if (correctPM && h < 12) { // Specifically for NE chart sunset times like "8:08"
-            h += 12;
-        }
-
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12;
-        return `${h}:${String(minutes).padStart(2, '0')} ${ampm} (${zoneLabel})`;
-    }
-
-    function calculateDistanceFromKearney(lat, lng) {
-        const R = 3959; // Earth's radius in miles
-        const dLat = (lat - KEARNEY_COORDS.lat) * Math.PI / 180;
-        const dLon = (lng - KEARNEY_COORDS.lng) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(KEARNEY_COORDS.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const distance = R * c;
-        const direction = lng > KEARNEY_COORDS.lng ? 'East' : 'West';
-        return { distance: Math.abs(distance), direction: direction };
-    }
-    
-    // WEATHER ADDITION: New helper function to convert wind degrees to a cardinal direction.
-    function degreesToCardinal(deg) {
-        const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-        const index = Math.round((deg % 360) / 22.5) % 16;
-        return directions[index];
+        addEventListeners();
+        setTodaysDate();
+        tryGeolocation();
+        // TZ UPGRADE: Determine the user's starting time zone from their browser.
+        setStartZone();
     }
 
-    // WEATHER ADDITION: New function to fetch weather forecast data.
-    async function getWeatherForecast(lat, lng) {
-        if (WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY_HERE') {
-            console.log("Weather forecast skipped: No API key provided.");
-            return null; // Don't try to fetch if the key is the placeholder
+    function addEventListeners() {
+        document.getElementById('latLngInput').addEventListener('change', handleLatLngInput);
+        document.getElementById('huntDate').addEventListener('change', updateCalculateButton);
+        document.getElementById('calculateButton').addEventListener('click', calculateTimeline);
+        
+        // Panel visibility controls
+        document.getElementById('mobileToggle').addEventListener('click', () => {
+            const isPanelOpen = document.getElementById('controlsPanel').classList.contains('show');
+            setPanelVisibility(!isPanelOpen);
+        });
+        document.getElementById('panelClose').addEventListener('click', () => setPanelVisibility(false));
+
+        document.querySelectorAll('.game-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.game-type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedGameType = this.dataset.type;
+            });
+        });
+        
+        document.querySelectorAll('.time-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const amount = parseInt(this.dataset.adjust, 10);
+                adjustDriveTime(amount);
+            });
+        });
+    }
+    
+    function setPanelVisibility(show) {
+        const controlsPanel = document.getElementById('controlsPanel');
+        const mobileToggle = document.getElementById('mobileToggle');
+        
+        controlsPanel.classList.toggle('show', show);
+        document.body.classList.toggle('panel-is-open', show);
+
+        const buttonText = isLocationSet ? 'Plan Your Hunt' : 'Select Hunt Location';
+        mobileToggle.textContent = show ? 'Close' : buttonText;
+    }
+
+    function tryGeolocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    startLocation = userCoords;
+                    if (startLocationMarker) {
+                        startLocationMarker.setPosition(userCoords);
+                    } else {
+                        startLocationMarker = new google.maps.Marker({
+                            position: startLocation, map: map, title: "Your Start Location",
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE, scale: 10,
+                                fillColor: "#4CAF50", fillOpacity: 1,
+                                strokeWeight: 2, strokeColor: "#ffffff"
+                            },
+                        });
+                    }
+                    map.setCenter(userCoords);
+                    map.setZoom(10);
+                    updateDriveTimeStatus('Your location found. Select a hunting spot.', 'ready');
+                    locationAccessDenied = false;
+                    if (isLocationSet && currentMarker) {
+                        calculateAndDisplayRoute(currentMarker.getPosition());
+                    }
+                },
+                (error) => {
+                    locationAccessDenied = true;
+                    let message = 'Could not get your location.';
+                    if (error.code === error.PERMISSION_DENIED) message = 'Location access denied. Drive time calculation disabled.';
+                    else if (error.code === error.POSITION_UNAVAILABLE) message = 'Location information unavailable.';
+                    else if (error.code === error.TIMEOUT) message = 'Location request timed out.';
+                    updateDriveTimeStatus(message, 'error');
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            updateDriveTimeStatus('Geolocation is not supported by your browser.', 'error');
         }
-        // This URL is for OpenWeatherMap's 5-day/3-hour forecast. It's a common free choice.
-        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lng}&appid=${WEATHER_API_KEY}&units=metric`;
+    }
+
+    function handleLatLngInput() {
+        const coords = this.value.trim().split(',').map(c => parseFloat(c.trim()));
+        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+            placeMarker(new google.maps.LatLng(coords[0], coords[1]));
+        }
+    }
+
+    function detectState(lat, lng) {
+        // Simplified state detection based on coordinates
+        // Nebraska boundaries approximately
+        if (lat >= 40.0 && lat <= 43.0 && lng >= -104.05 && lng <= -95.3) {
+            return 'NE';
+        }
+        // Iowa boundaries approximately
+        else if (lat >= 40.36 && lat <= 43.5 && lng >= -96.64 && lng <= -90.14) {
+            return 'IA';
+        }
+        // Kansas boundaries approximately
+        else if (lat >= 37.0 && lat <= 40.0 && lng >= -102.05 && lng <= -94.58) {
+            return 'KS';
+        }
+        // Wyoming boundaries approximately
+        else if (lat >= 41.0 && lat <= 45.0 && lng >= -111.05 && lng <= -104.05) {
+            return 'WY';
+        }
+        return null;
+    }
+
+    async function placeMarker(location) { // TZ UPGRADE: Made function async to await time zone lookup
+        const lat = location.lat();
+        const lng = location.lng();
+        
+        // Detect which state we're in
+        currentState = detectState(lat, lng);
+        updateStateBadge(currentState);
+        
+        // TZ UPGRADE: Get time zone for the selected hunting location
+        await getHuntZone(lat, lng);
+
+        updateLatLngInput(location);
+        isLocationSet = true;
+        updateCalculateButton();
+        
+        const mobileToggle = document.getElementById('mobileToggle');
+        mobileToggle.classList.remove('initial');
+        if (!document.getElementById('controlsPanel').classList.contains('show')) {
+             mobileToggle.textContent = 'Plan Your Hunt';
+        }
+
+        if (currentMarker) {
+            currentMarker.setPosition(location);
+        } else {
+            currentMarker = new google.maps.Marker({
+                position: location, map: map, draggable: true, title: 'Hunting Location',
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE, scale: 12,
+                    fillColor: "#FFBF00", fillOpacity: 0.9,
+                    strokeWeight: 3, strokeColor: "#fff"
+                }
+            });
+            currentMarker.addListener('dragend', (e) => placeMarker(e.latLng));
+        }
+        calculateAndDisplayRoute(location);
+    }
+
+    function updateStateBadge(state) {
+        const badge = document.getElementById('stateBadge');
+        if (state) {
+            badge.textContent = state;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function calculateAndDisplayRoute(destination) {
+        if (!startLocation) {
+            updateDriveTimeStatus("Cannot calculate route without your start location.", "error");
+            return;
+        }
+        updateDriveTimeStatus("Calculating route...", "calculating");
+        clearRoutes();
+        directionsService.route({
+            origin: startLocation,
+            destination: destination,
+            travelMode: google.maps.TravelMode.DRIVING,
+            provideRouteAlternatives: true
+        }, (response, status) => {
+            if (status === "OK") {
+                fullDirectionsResponse = response;
+                directionsRenderer.setDirections(response);
+                const bounds = new google.maps.LatLngBounds();
+                response.routes[0].overview_path.forEach(point => bounds.extend(point));
+                map.fitBounds(bounds);
+                showRouteOptions(response.routes);
+                updateDriveTimeStatus(`${response.routes.length} route(s) found. Choose one below.`, "ready");
+            } else {
+                updateDriveTimeStatus('Could not calculate drive time. Check connection.', 'error');
+            }
+        });
+    }
+
+    function showRouteOptions(routes) {
+        const routesList = document.getElementById('routesList');
+        routesList.innerHTML = '';
+        alternateRoutePolylines.forEach(p => p.setMap(null));
+        alternateRoutePolylines = [];
+
+        for (let i = 1; i < routes.length; i++) {
+            const polyline = new google.maps.Polyline({
+                path: routes[i].overview_path, strokeColor: '#888888',
+                strokeOpacity: 0.6, strokeWeight: 6, map: map
+            });
+            alternateRoutePolylines.push(polyline);
+        }
+
+        routes.forEach((route, index) => {
+            const routeDiv = document.createElement('div');
+            routeDiv.className = 'route-option';
+            if (index === 0) routeDiv.classList.add('selected');
+            const duration = Math.round(route.legs[0].duration.value / 60);
+            const distance = route.legs[0].distance.text;
+            const summary = route.summary || 'Main route';
+            routeDiv.innerHTML = `
+                <div class="route-summary">
+                    <div class="route-time">${duration} min</div>
+                    <div class="route-distance">${distance}</div>
+                </div>
+                <div class="route-description">via ${summary}</div>`;
+            routeDiv.addEventListener('click', () => {
+                selectRoute(index);
+                document.querySelectorAll('.route-option').forEach(r => r.classList.remove('selected'));
+                routeDiv.classList.add('selected');
+            });
+            routesList.appendChild(routeDiv);
+        });
+
+        if (routes.length > 0) {
+            updateDriveTime(routes[0]);
+            document.getElementById('routeOptions').classList.add('show');
+            document.getElementById('driveTimeAdjuster').classList.add('show');
+        }
+    }
+
+    function selectRoute(index) {
+        directionsRenderer.setRouteIndex(index);
+        alternateRoutePolylines.forEach(p => p.setMap(null));
+        alternateRoutePolylines = [];
+        for (let i = 0; i < fullDirectionsResponse.routes.length; i++) {
+            if (i !== index) {
+                const polyline = new google.maps.Polyline({
+                    path: fullDirectionsResponse.routes[i].overview_path,
+                    strokeColor: '#888888', strokeOpacity: 0.6,
+                    strokeWeight: 6, map: map
+                });
+                alternateRoutePolylines.push(polyline);
+            }
+        }
+        updateDriveTime(fullDirectionsResponse.routes[index]);
+    }
+
+    function updateDriveTime(route) {
+        baseDriveTime = Math.round(route.legs[0].duration.value / 60);
+        driveTimeAdjustment = 0;
+        const totalTime = baseDriveTime + driveTimeAdjustment;
+        document.getElementById('driveTime').value = totalTime;
+        document.getElementById('adjustedTime').textContent = totalTime;
+    }
+    
+    function adjustDriveTime(minutes) {
+        driveTimeAdjustment += minutes;
+        const totalTime = Math.max(0, baseDriveTime + driveTimeAdjustment);
+        document.getElementById('adjustedTime').textContent = totalTime;
+        document.getElementById('driveTime').value = totalTime;
+    }
+
+    function clearRoutes() {
+        if (directionsRenderer) directionsRenderer.setDirections({routes: []});
+        alternateRoutePolylines.forEach(p => p.setMap(null));
+        alternateRoutePolylines = [];
+        document.getElementById('routeOptions').classList.remove('show');
+        document.getElementById('driveTimeAdjuster').classList.remove('show');
+    }
+
+    async function getSunriseSunsetForLocation(lat, lng, date) {
+        // Using sunrise-sunset.org API which returns UTC times
+        const url = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&date=${date}&formatted=0`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.status === 'OK') {
+                // TZ UPGRADE: Return the raw UTC ISO strings. Conversion will happen later.
+                return {
+                    sunrise: data.results.sunrise,
+                    sunset: data.results.sunset
+                };
+            }
+        } catch (error) {
+            console.error('Error fetching sunrise/sunset:', error);
+        }
+        return null;
+    }
+
+    async function calculateTimeline() {
+        const button = document.getElementById('calculateButton');
+        const buttonText = document.getElementById('buttonText');
+        const spinner = document.getElementById('buttonSpinner');
+        button.disabled = true;
+        buttonText.textContent = 'Calculating...';
+        spinner.style.display = 'inline-block';
+
+        const huntDateInput = document.getElementById('huntDate').value;
+        if (!huntDateInput || !huntLocation || !huntZoneInfo.id) {
+             alert('Please ensure location is set and time zone has been found.');
+            resetButton();
+            return;
+        }
+
+        let sunInfo = null;
+        let adjustedSunrise, adjustedSunset;
+        let calcText = '';
+
+        if (currentState === 'NE' && sunData[huntDateInput]) {
+            sunInfo = sunData[huntDateInput];
+            let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number);
+            if (sunsetHour < 12) sunsetHour += 12; // PM correction
+            const correctedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`;
+
+            const locationInfo = calculateDistanceFromKearney(huntLocation.lat, huntLocation.lng);
+            const timeAdjustmentMinutes = Math.round(locationInfo.distance / MILES_PER_MINUTE);
+            const actualAdjustment = locationInfo.direction === 'East' ? -timeAdjustmentMinutes : timeAdjustmentMinutes;
+            calcText = `${locationInfo.distance.toFixed(1)} miles ${locationInfo.direction} of Kearney ÷ ${MILES_PER_MINUTE} = ${timeAdjustmentMinutes} min adjustment`;
+
+            adjustedSunrise = adjustTime(sunInfo.sunrise, actualAdjustment);
+            adjustedSunset = adjustTime(correctedSunset, actualAdjustment);
+            
+            // TZ UPGRADE: Apply -1 hour adjustment if hunting in MT, as per NE regulations.
+            if (huntZoneInfo.abbreviation.startsWith('M')) {
+                adjustedSunrise = adjustTime(adjustedSunrise, -60);
+                adjustedSunset = adjustTime(adjustedSunset, -60);
+                calcText += ' (-1hr for MT)';
+            }
+
+        } else {
+            const apiSunData = await getSunriseSunsetForLocation(huntLocation.lat, huntLocation.lng, huntDateInput);
+            if (apiSunData) {
+                // TZ UPGRADE: Convert UTC times from API to the local time of the hunting spot.
+                const sunriseUtcDate = new Date(apiSunData.sunrise);
+                const sunsetUtcDate = new Date(apiSunData.sunset);
+                adjustedSunrise = formatUtcDateToTime(sunriseUtcDate, huntZoneInfo.id);
+                adjustedSunset = formatUtcDateToTime(sunsetUtcDate, huntZoneInfo.id);
+                sunInfo = { sunrise: adjustedSunrise, sunset: adjustedSunset };
+                calcText = `Astronomically accurate for lat/lng in ${huntZoneInfo.abbreviation}.`;
+            } else {
+                alert('Could not fetch sunrise/sunset data. Please check your connection.');
+                resetButton();
+                return;
+            }
+        }
+
+        const legalShootingTime = adjustTime(adjustedSunrise, -30);
+        const endLegalShooting = (selectedGameType === 'deer') ? adjustTime(adjustedSunset, 30) : adjustedSunset;
+
+        // TZ UPGRADE: Perform all timeline calculations using absolute Date objects to handle time zones correctly.
+        const driveTime = parseInt(document.getElementById('driveTime').value) || 0;
+        const bufferTime = parseInt(document.getElementById('bufferTime').value) || 0;
+        const parkToSetTime = parseInt(document.getElementById('parkToSetTime').value) || 0;
+        const setToEstablishTime = parseInt(document.getElementById('setToEstablishTime').value) || 0;
+
+        // 1. Get a reliable Date object for the legal shooting time in the hunt time zone.
+        const huntZoneOffset = getUtcOffsetString(huntZoneInfo.id, huntDateInput);
+        const legalShootingIso = `${huntDateInput}T${legalShootingTime}:00${huntZoneOffset}`;
+        const legalShootingDate = new Date(legalShootingIso);
+        
+        // 2. Create other Date objects by subtracting minutes (as milliseconds).
+        const establishedByDate = new Date(legalShootingDate.getTime() - (bufferTime * 60000));
+        const setByDate = new Date(establishedByDate.getTime() - (setToEstablishTime * 60000));
+        const parkedByDate = new Date(setByDate.getTime() - (parkToSetTime * 60000));
+        const leaveByDate = new Date(parkedByDate.getTime() - (driveTime * 60000));
+        const endLegalShootingDate = new Date(`${huntDateInput}T${endLegalShooting}:00${huntZoneOffset}`);
+        
+        // 3. Format these dates into strings for display, using the correct time zone for each.
+        const leaveByStr = formatDateToTimeAmPm(leaveByDate, startZoneInfo.id, startZoneInfo.abbreviation);
+        const parkedByStr = formatDateToTimeAmPm(parkedByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const setByStr = formatDateToTimeAmPm(setByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const establishedByStr = formatDateToTimeAmPm(establishedByDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const legalShootingStr = formatDateToTimeAmPm(legalShootingDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const endLegalShootingStr = formatDateToTimeAmPm(endLegalShootingDate, huntZoneInfo.id, huntZoneInfo.abbreviation);
+        
+        document.getElementById('timeline-results').innerHTML = `<div class="timeline">
+            <div class="timeline-item highlight"><div class="timeline-label">Leave By</div><div class="timeline-time">${leaveByStr}</div></div>
+            <div class="timeline-item"><div class="timeline-label">Parked By</div><div class="timeline-time">${parkedByStr}</div></div>
+            <div class="timeline-item"><div class="timeline-label">At Stand/Blind</div><div class="timeline-time">${setByStr}</div></div>
+            <div class="timeline-item"><div class="timeline-label">Established By</div><div class="timeline-time">${establishedByStr}</div></div>
+            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Begins</div><div class="timeline-time">${legalShootingStr}</div></div>
+            <div class="timeline-item highlight"><div class="timeline-label">Legal Shooting Ends</div><div class="timeline-time">${endLegalShootingStr}</div></div>
+        </div>`;
+
+        let infoGridHTML = `<div class="info-grid">`;
+        const adjustedSunriseStr = formatDateToTimeAmPm(new Date(`${huntDateInput}T${adjustedSunrise}:00${huntZoneOffset}`), huntZoneInfo.id, huntZoneInfo.abbreviation);
+        const adjustedSunsetStr = formatDateToTimeAmPm(new Date(`${huntDateInput}T${adjustedSunset}:00${huntZoneOffset}`), huntZoneInfo.id, huntZoneInfo.abbreviation);
+
+        if (currentState === 'NE') {
+             const chartSunriseStr = formatTimeAMPM(sunInfo.sunrise, 'CT');
+             const chartSunsetStr = formatTimeAMPM(sunInfo.sunset, 'CT', true); // Add PM correction
+             infoGridHTML += `
+                <div class="info-item"><div class="info-label">Chart Sunrise</div><div class="info-value">${chartSunriseStr}</div></div>
+                <div class="info-item"><div class="info-label">Chart Sunset</div><div class="info-value">${chartSunsetStr}</div></div>
+                <div class="info-item"><div class="info-label">Adjusted Sunrise</div><div class="info-value">${adjustedSunriseStr}</div><div class="info-calc">${calcText}<br/><a href="http://digital.outdoornebraska.gov/i/1537408-small-game-and-waterfowl-guide-2025-26-web/39" target="_blank">Pg. 40 2025 Waterfowl Guide</a></div></div>
+                <div class="info-item"><div class="info-label">Adjusted Sunset</div><div class="info-value">${adjustedSunsetStr}</div><div class="info-calc">${calcText}</div></div>`;
+        } else {
+            infoGridHTML += `
+                <div class="info-item"><div class="info-label">Location Sunrise</div><div class="info-value">${adjustedSunriseStr}</div></div>
+                <div class="info-item"><div class="info-label">Location Sunset</div><div class="info-value">${adjustedSunsetStr}</div></div>
+                <div class="info-item"><div class="info-label">State</div><div class="info-value">${currentState || 'Unknown'}</div><div class="info-calc">${calcText}</div></div>
+                <div class="info-item"><div class="info-label">Legal Hours</div><div class="info-value">${selectedGameType === 'deer' ? '30 min before sunrise to 30 min after sunset' : '30 min before sunrise to sunset'}</div></div>`;
+        }
+        
+        infoGridHTML += `
+            <div class="info-item"><div class="info-label">Game Type</div><div class="info-value">${selectedGameType === 'deer' ? 'Deer' : 'Waterfowl'}</div></div>
+            <div class="info-item"><div class="info-label">Total Drive Time</div><div class="info-value">${driveTime} minutes</div></div>
+        </div>`;
+        
+        document.getElementById('info-grid-results').innerHTML = infoGridHTML;
+
+        const resultsSection = document.getElementById('resultsSection');
+        resultsSection.classList.add('show');
+        if (window.innerWidth <= 768) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        const copyText = `Hunt Plan for ${huntDateInput} in ${currentState || 'location'} (${selectedGameType}):\n\nLeave by: ${leaveByStr}\nParked by: ${parkedByStr}\nAt stand/blind: ${setByStr}\nEstablished: ${establishedByStr}\n\nLegal Shooting: ${legalShootingStr} - ${endLegalShootingStr}\n\nDrive: ${driveTime}m, Walk: ${parkToSetTime}m, Setup: ${setToEstablishTime}m`;
+        
+        document.getElementById('copyButton').onclick = function() {
+            navigator.clipboard.writeText(copyText).then(() => {
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'Copied! ✓';
+                setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+            }).catch(err => { alert('Failed to copy. Please try again.'); });
+        };
+
+        document.getElementById('step1').classList.remove('highlight-input');
+        resetButton();
+    }
+
+    // --- Helper & Utility Functions ---
+
+    // TZ UPGRADE: Sets the starting time zone based on the user's browser.
+    function setStartZone() {
+        const userTimeZoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        startZoneInfo.id = userTimeZoneId;
+        startZoneInfo.abbreviation = getAbbreviation(userTimeZoneId);
+    }
+
+    // TZ UPGRADE: Gets time zone info for the hunting location from Google's API.
+    async function getHuntZone(lat, lng) {
+        // Use a timestamp for the selected hunt date to get correct DST info.
+        const huntDate = document.getElementById('huntDate').value;
+        const timestamp = new Date(huntDate + 'T12:00:00').getTime() / 1000;
+        
+        // FINAL FIX: This URL now uses the dedicated TIMEZONE_API_KEY
+        const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${TIMEZONE_API_KEY}`;
         
         try {
             const response = await fetch(url);
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error("Weather API Error:", errorData.message);
-                alert(`Weather API Error: ${errorData.message}`);
-                return null;
-            }
             const data = await response.json();
-            return data.list; // Return the array of forecast chunks
+            if (data.status === 'OK') {
+                huntZoneInfo.id = data.timeZoneId;
+                huntZoneInfo.abbreviation = getAbbreviation(data.timeZoneId, new Date(timestamp * 1000));
+                updateLocationStatus(`Location set in ${huntZoneInfo.abbreviation} time zone.`, 'ready');
+            } else {
+                huntZoneInfo = { id: null, abbreviation: null }; // Reset on failure
+                updateLocationStatus(`Error: Could not determine time zone. ${data.errorMessage || ''}`, 'error');
+                console.error("Time Zone API Error:", data.errorMessage);
+            }
         } catch (error) {
-            console.error("Failed to fetch weather data:", error);
-            return null;
+            huntZoneInfo = { id: null, abbreviation: null }; // Reset on failure
+            updateLocationStatus(`Error: Time zone request failed.`, 'error');
+            console.error('Fetch error for Time Zone API:', error);
+        }
+    }
+    
+    // TZ UPGRADE: Reliably gets a time zone abbreviation (e.g., 'CDT', 'MST') for any IANA time zone ID.
+    function getAbbreviation(timeZoneId, date = new Date()) {
+        const parts = new Intl.DateTimeFormat('en-us', {
+            timeZone: timeZoneId,
+            timeZoneName: 'short',
+        }).formatToParts(date);
+        return parts.find(p => p.type === 'timeZoneName')?.value || '';
+    }
+    
+    // TZ UPGRADE: Gets the UTC offset string (e.g., "-05:00") needed to create absolute Date objects.
+    function getUtcOffsetString(timeZone, dateStr) {
+        const date = new Date(dateStr + 'T12:00:00'); // Use midday to avoid DST crossover issues
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone,
+            timeZoneName: 'longOffset'
+        }).formatToParts(date);
+        const offsetPart = parts.find(p => p.type === 'timeZoneName');
+        return offsetPart ? offsetPart.value.replace('GMT', '') : '+00:00';
+    }
+    
+    // TZ UPGRADE: Formats a UTC Date object into a time string for a specified time zone.
+    function formatUtcDateToTime(dateObj, timeZoneId) {
+        const timeString = dateObj.toLocaleTimeString('en-US', {
+            timeZone: timeZoneId,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+        // Handles edge case where midnight is "24:00"
+        return timeString.replace('24:', '00:');
+    }
+
+    // TZ UPGRADE: Formats a Date object to an AM/PM time string with a time zone label.
+    function formatDateToTimeAmPm(dateObj, timeZoneId, abbreviation) {
+        if (!dateObj || isNaN(dateObj)) return 'Invalid Time';
+        const formattedTime = dateObj.toLocaleTimeString('en-US', {
+            timeZone: timeZoneId,
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        });
+        return `${formattedTime} (${abbreviation})`;
+    }
+
+
+    function updateDriveTimeStatus(message, type) {
+        const statusEl = document.getElementById('driveTimeStatus');
+        statusEl.className = `status-indicator status-${type}`;
+        statusEl.textContent = message;
+    }
+
+    function updateLocationStatus(message, type = 'waiting') {
+        const statusEl = document.getElementById('locationStatus');
+        statusEl.className = `status-indicator status-${type}`;
+        statusEl.textContent = message;
+    }
+
+    function updateCalculateButton() {
+        const button = document.getElementById('calculateButton');
+        const buttonText = document.getElementById('buttonText');
+        const huntDate = document.getElementById('huntDate').value;
+        if (isLocationSet && huntDate && huntZoneInfo.id) {
+            button.disabled = false;
+            buttonText.textContent = 'Calculate Timeline';
+        } else if (!huntDate) {
+            button.disabled = true;
+            buttonText.textContent = 'Select Hunt Date';
+        } else if (!huntZoneInfo.id) {
+             button.disabled = true;
+             buttonText.textContent = 'Finding Time Zone...';
+        } else {
+            button.disabled = true;
+            buttonText.textContent = 'Set Location First';
         }
     }
 
-    // WEATHER ADDITION: Finds the forecast in the list closest to our target time.
-    function findClosestForecast(targetDate, forecastList) {
-        if (!forecastList || forecastList.length === 0) return null;
+    function adjustTime(time, minutes) {
+        const today = new Date();
+        const [hour, min] = time.split(':').map(Number);
+        const timeDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour, min);
+        timeDate.setMinutes(timeDate.getMinutes() + minutes);
+        const h = String(timeDate.getHours()).padStart(2, '0');
+        const m = String(timeDate.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+    }
 
-        const targetTimestamp = targetDate.getTime() / 1000; // Convert to seconds
-        let closestForecast = null;
-        let minDiff = Infinity;
+    function updateLatLngInput(location) {
+        document.getElementById('latLngInput').value = `${location.lat().toFixed(6)}, ${location.lng().toFixed(6)}`;
+        huntLocation = { lat: location.lat(), lng: location.lng() };
+    }
 
-        for (const forecast of forecastList) {
-            const diff = Math.abs(targetTimestamp - forecast.dt);
-            if (diff < minDiff) {
-                minDiff = diff;
-                closestForecast = forecast;
-            }
+    function resetButton() {
+        const button = document.getElementById('calculateButton');
+        const spinner = document.getElementById('buttonSpinner');
+        button.disabled = false;
+        spinner.style.display = 'none';
+        updateCalculateButton();
+    }
+
+    function setTodaysDate() {
+        const today = new Date();
+        // Set date to the current context date for demonstration
+        const yyyy = 2025;
+        const mm = '09'; // September
+        const dd = '09'; // 9th
+        document.getElementById('huntDate').value = `${yyyy}-${mm}-${dd}`;
+        updateCalculateButton();
+    }
+    
+    function formatTimeAMPM(time24, zoneLabel, correctPM = false) {
+        if (!time24) return '';
+        let [hours, minutes] = time24.split(':');
+        let h = parseInt(hours, 10);
+
+        if (correctPM && h < 12) { // Specifically for NE chart sunset times like "8:08"
+            h += 12;
         }
-        return closestForecast;
+
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${String(minutes).padStart(2, '0')} ${ampm} (${zoneLabel})`;
+    }
+
+    function calculateDistanceFromKearney(lat, lng) {
+        const R = 3959; // Earth's radius in miles
+        const dLat = (lat - KEARNEY_COORDS.lat) * Math.PI / 180;
+        const dLon = (lng - KEARNEY_COORDS.lng) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(KEARNEY_COORDS.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = R * c;
+        const direction = lng > KEARNEY_COORDS.lng ? 'East' : 'West';
+        return { distance: Math.abs(distance), direction: direction };
     }
 
 </script>
