@@ -468,6 +468,8 @@
 
         addEventListeners();
         setTodaysDate();
+        // Initialize default timezone from browser
+        startTimeZone = getUserTimeZone();
         tryGeolocation();
     }
 
