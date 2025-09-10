@@ -30,11 +30,16 @@
         #search-input::placeholder {
             color: #999;
         }
+        .custom-controls-container {
+            display: flex;
+            flex-direction: column;
+            margin: 10px !important;
+        }
         .custom-map-control-button {
             background-color: #2C2C2E; border: 2px solid #333; border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); color: #EAEAEA;
             cursor: pointer; font-family: inherit; font-size: 14px;
-            font-weight: 600; line-height: 38px; margin: 10px !important;
+            font-weight: 600; line-height: 38px; margin-bottom: 10px !important;
             padding: 0 15px; text-align: center; pointer-events: auto;
             transition: all 0.2s ease;
         }
@@ -47,7 +52,6 @@
              color: #4CAF50;
              font-weight: bold;
         }
-
 
         .mobile-button-container {
             display: none;
@@ -171,11 +175,17 @@
         .results-section { display: none; margin-bottom: 30px;}
         .results-section.show { display: block; }
         .timeline, .info-grid { background: #1B1B1B; border-radius: 6px; padding: 20px; }
-        .timeline-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #333; }
+        .timeline-item { 
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            padding: 12px 0; 
+            border-bottom: 1px solid #333; 
+        }
         .timeline-item.highlight { background: rgba(76, 175, 80, 0.1); padding: 12px 10px; border-radius: 6px; margin: 5px 0; }
         .timeline-item:last-child { border-bottom: none; }
         .timeline-label { font-weight: 500; }
-        .timeline-time { font-weight: bold; color: #4CAF50; }
+        .timeline-time { font-weight: bold; color: #4CAF50; text-align: right; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem; margin-top: 20px; }
         .info-item { padding: 15px; border-left: 3px solid #4CAF50; background: #2C2C2E; border-radius: 4px; }
         .info-label { font-weight: 600; margin-bottom: 5px; }
@@ -191,7 +201,6 @@
             font-size: 0.85rem; font-weight: 600; margin-left: 10px;
         }
 
-        /* Weather Styles */
         .weather-forecast {
             background: #1B1B1B; border-radius: 6px; padding: 20px;
         }
@@ -215,6 +224,7 @@
         }
         .weather-speed { font-weight: bold; font-size: 1rem; color: #4CAF50; }
         .weather-temp { font-size: 0.9rem; color: #999; }
+        .weather-conditions { font-size: 0.9rem; color: #ccc; text-transform: capitalize; }
 
 
         /* --- MOBILE STYLES --- */
@@ -231,7 +241,7 @@
                 padding-top: 70px !important;
             }
             /* Fix for map buttons being hidden on mobile */
-            #map .gm-style-mtc, #map .gm-svpc, #map .gmnoprint {
+            .custom-controls-container {
                 margin-top: 60px !important;
             }
 
@@ -268,7 +278,7 @@
     </div>
 
     <div class="map-ui-container">
-        <input type="text" id="search-input" placeholder="Search for your hunting location...">
+        <input type="text" id="search-input" placeholder="Search for a location...">
     </div>
 
     <div class="controls-panel" id="controlsPanel">
@@ -301,11 +311,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Click Mode:</label>
-                    <div class="game-type-selector">
-                        <div id="setStartBtn" class="game-type-btn" data-mode="start">Set Start</div>
-                        <div id="setHuntBtn" class="game-type-btn active" data-mode="hunt">Set Hunt Spot</div>
-                    </div>
+                    <button id="changeStartLocationBtn" class="btn">Change Start Location</button>
                 </div>
 
                 <div id="locationStatus" class="status-indicator status-waiting">
@@ -416,7 +422,7 @@
     let fullDirectionsResponse = null;
     let locationAccessDenied = false;
     let currentState = null;
-    let mapClickMode = 'hunt'; // 'hunt' or 'start'
+    let isSettingStartLocation = false;
 
     // TZ UPGRADE: Add state variables for time zone information
     let startZoneInfo = { id: null, abbreviation: null };
@@ -425,7 +431,6 @@
     const TIMEZONE_API_KEY = 'AIzaSyCT9XxjxT5t4Wyjwg0_s2drfClF_TijOLQ';
     
     // WEATHER ADDITION: Add a constant for your Weather API Key.
-    // Replace this placeholder with your actual key from a provider like OpenWeatherMap.
     const WEATHER_API_KEY = 'c3e6734aa6375dfb0204060fffb7ba22';
 
 
@@ -453,23 +458,16 @@
             rotateControl: false, 
             fullscreenControl: true
         });
+        
+        const controlsContainer = document.createElement("div");
+        controlsContainer.classList.add("custom-controls-container");
 
         const locationButton = document.createElement("button");
         locationButton.textContent = "My Location";
         locationButton.classList.add("custom-map-control-button");
-        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(locationButton);
+        controlsContainer.appendChild(locationButton);
         
-        const setStartButton = document.createElement("button");
-        setStartButton.textContent = "Set Start";
-        setStartButton.id = "setStartBtn_map";
-        setStartButton.classList.add("custom-map-control-button");
-        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(setStartButton);
-        
-        const setHuntButton = document.createElement("button");
-        setHuntButton.textContent = "Set Hunt Spot";
-        setHuntButton.id = "setHuntBtn_map";
-        setHuntButton.classList.add("custom-map-control-button", "active");
-        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(setHuntButton);
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlsContainer);
 
 
         locationButton.addEventListener("click", () => {
@@ -483,27 +481,9 @@
             }
         });
         
-        const modeButtons = [setStartButton, setHuntButton, document.getElementById('setStartBtn'), document.getElementById('setHuntBtn')];
-
-        const setClickMode = (mode) => {
-            mapClickMode = mode;
-            modeButtons.forEach(btn => {
-                if (btn.id.includes(mode)) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        };
-        
-        setStartButton.addEventListener("click", () => setClickMode('start'));
-        setHuntButton.addEventListener("click", () => setClickMode('hunt'));
-        document.getElementById('setStartBtn').addEventListener("click", () => setClickMode('start'));
-        document.getElementById('setHuntBtn').addEventListener("click", () => setClickMode('hunt'));
-
         directionsRenderer = new google.maps.DirectionsRenderer({
             suppressMarkers: true,
-            polylineOptions: { strokeColor: '#4CAF50', strokeWeight: 8, strokeOpacity: 0.9 }
+            polylineOptions: { strokeColor: '#4CAF50', strokeWeight: 8, strokeOpacity: 0.9 }
         });
         directionsRenderer.setMap(map);
 
@@ -518,6 +498,10 @@
         searchBox.addListener("places_changed", () => {
             const places = searchBox.getPlaces();
             if (places.length > 0) {
+                // When searching, always assume it's for the hunt spot
+                isSettingStartLocation = false;
+                document.getElementById('changeStartLocationBtn').classList.remove('active');
+                document.getElementById('changeStartLocationBtn').textContent = 'Change Start Location';
                 placeMarker(places[0].geometry.location);
             }
         });
@@ -527,7 +511,6 @@
         addEventListeners();
         setTodaysDate();
         tryGeolocation();
-        // TZ UPGRADE: Determine the user's starting time zone from their browser.
         setStartZone();
     }
 
@@ -535,6 +518,7 @@
         document.getElementById('latLngInput').addEventListener('change', handleLatLngInput);
         document.getElementById('huntDate').addEventListener('change', updateCalculateButton);
         document.getElementById('calculateButton').addEventListener('click', calculateTimeline);
+        document.getElementById('changeStartLocationBtn').addEventListener('click', toggleSetStartLocation);
         
         // Panel visibility controls
         document.getElementById('mobileToggle').addEventListener('click', () => {
@@ -543,14 +527,12 @@
         });
         document.getElementById('panelClose').addEventListener('click', () => setPanelVisibility(false));
 
-        document.querySelectorAll('.game-type-btn').forEach(btn => {
-            if (btn.dataset.type) { // Ensure it's a game type button
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.game-type-btn[data-type]').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedGameType = this.dataset.type;
-                });
-            }
+        document.querySelectorAll('.game-type-btn[data-type]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.game-type-btn[data-type]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedGameType = this.dataset.type;
+            });
         });
         
         document.querySelectorAll('.time-btn').forEach(button => {
@@ -572,6 +554,15 @@
         mobileToggle.textContent = show ? 'Close' : buttonText;
     }
 
+    function toggleSetStartLocation() {
+        isSettingStartLocation = true;
+        const btn = document.getElementById('changeStartLocationBtn');
+        btn.classList.add('active');
+        btn.textContent = 'Now Click Map to Set New Start...';
+        document.getElementById('locationStatus').className = 'status-indicator status-calculating';
+        document.getElementById('locationStatus').textContent = 'Waiting for new start location...';
+    }
+
     function tryGeolocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -580,7 +571,7 @@
                     setStartLocation(userCoords);
                     map.setCenter(userCoords);
                     map.setZoom(10);
-                    updateDriveTimeStatus('Your location found. Select a hunting spot.', 'ready');
+                    updateDriveTimeStatus('Your location found. Set a hunt spot.', 'ready');
                     locationAccessDenied = false;
                 },
                 (error) => {
@@ -599,13 +590,15 @@
     }
 
     function setStartLocation(location) {
-        startLocation = { lat: location.lat(), lng: location.lng() };
+        // location can be a literal {lat, lng} or a google.maps.LatLng object
+        const latLng = location.lat && location.lng ? location : new google.maps.LatLng(location);
+        startLocation = { lat: latLng.lat(), lng: latLng.lng() };
 
         if (startLocationMarker) {
-            startLocationMarker.setPosition(location);
+            startLocationMarker.setPosition(latLng);
         } else {
             startLocationMarker = new google.maps.Marker({
-                position: location,
+                position: latLng,
                 map: map,
                 title: "Your Start Location",
                 icon: {
@@ -621,6 +614,7 @@
         if (huntLocation) {
             calculateAndDisplayRoute(new google.maps.LatLng(huntLocation.lat, huntLocation.lng));
         }
+        updateCalculateButton();
     }
 
     function handleLatLngInput() {
@@ -639,8 +633,13 @@
     }
 
     async function placeMarker(location) {
-        if (mapClickMode === 'start') {
+        if (isSettingStartLocation) {
             setStartLocation(location);
+            isSettingStartLocation = false;
+            const btn = document.getElementById('changeStartLocationBtn');
+            btn.classList.remove('active');
+            btn.textContent = 'Change Start Location';
+            updateLocationStatus('Start location updated. Set hunt spot.', 'ready');
             return; 
         }
 
@@ -654,7 +653,6 @@
 
         updateLatLngInput(location);
         isLocationSet = true;
-        updateCalculateButton();
         
         const mobileToggle = document.getElementById('mobileToggle');
         mobileToggle.classList.remove('initial');
@@ -678,6 +676,7 @@
         if (startLocation) {
             calculateAndDisplayRoute(location);
         }
+        updateCalculateButton();
     }
 
     function updateStateBadge(state) {
@@ -705,13 +704,13 @@
         }, (response, status) => {
             if (status === "OK") {
                 fullDirectionsResponse = response;
-                directionsRenderer.setDirections(response);
-                const bounds = new google.maps.LatLngBounds();
+                directionsRenderer.setDirections(response); // Show the primary route
+                const bounds = new google.maps.LatLngBounds();
                 bounds.extend(new google.maps.LatLng(startLocation.lat, startLocation.lng));
                 bounds.extend(destination);
                 map.fitBounds(bounds);
                 showRouteOptions(response.routes);
-                updateDriveTimeStatus(`${response.routes.length} route(s) found. Choose one below.`, "ready");
+                updateDriveTimeStatus(`${response.routes.length} route(s) found. Choose one below or on the map.`, "ready");
             } else {
                 updateDriveTimeStatus('Could not calculate drive time. Check connection.', 'error');
             }
@@ -719,22 +718,33 @@
     }
 
     function showRouteOptions(routes) {
+        clearRoutes(); // Clear any previous polylines
+        directionsRenderer.setDirections(fullDirectionsResponse);
+        directionsRenderer.setRouteIndex(0);
+
         const routesList = document.getElementById('routesList');
         routesList.innerHTML = '';
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-
+        
+        // Draw alternate routes manually to make them clickable
         for (let i = 1; i < routes.length; i++) {
             const polyline = new google.maps.Polyline({
-                path: routes[i].overview_path, strokeColor: '#888888',
-                strokeOpacity: 0.6, strokeWeight: 6, map: map
+                path: routes[i].overview_path,
+                strokeColor: '#888888',
+                strokeOpacity: 0.7,
+                strokeWeight: 6,
+                map: map,
+                zIndex: 1 // Keep alternates below main route
             });
+            polyline.addListener('click', () => {
+                selectRoute(i);
+            });
             alternateRoutePolylines.push(polyline);
         }
 
         routes.forEach((route, index) => {
             const routeDiv = document.createElement('div');
             routeDiv.className = 'route-option';
+            routeDiv.dataset.routeIndex = index;
             if (index === 0) routeDiv.classList.add('selected');
             const duration = Math.round(route.legs[0].duration.value / 60);
             const distance = route.legs[0].distance.text;
@@ -747,8 +757,6 @@
                 <div class="route-description">via ${summary}</div>`;
             routeDiv.addEventListener('click', () => {
                 selectRoute(index);
-                document.querySelectorAll('.route-option').forEach(r => r.classList.remove('selected'));
-                routeDiv.classList.add('selected');
             });
             routesList.appendChild(routeDiv);
         });
@@ -761,19 +769,14 @@
     }
 
     function selectRoute(index) {
+        // Set the main renderer to the selected route
         directionsRenderer.setRouteIndex(index);
-        alternateRoutePolylines.forEach(p => p.setMap(null));
-        alternateRoutePolylines = [];
-        for (let i = 0; i < fullDirectionsResponse.routes.length; i++) {
-            if (i !== index) {
-                const polyline = new google.maps.Polyline({
-                    path: fullDirectionsResponse.routes[i].overview_path,
-                    strokeColor: '#888888', strokeOpacity: 0.6,
-                    strokeWeight: 6, map: map
-                });
-                alternateRoutePolylines.push(polyline);
-            }
-        }
+        
+        // Update the visual selection in the side panel
+        document.querySelectorAll('.route-option').forEach(r => r.classList.remove('selected'));
+        document.querySelector(`.route-option[data-route-index='${index}']`).classList.add('selected');
+        
+        // Update the drive time in the input
         updateDriveTime(fullDirectionsResponse.routes[index]);
     }
 
@@ -843,7 +846,7 @@
         if (currentState === 'NE' && sunData[huntDateInput]) {
             sunInfo = sunData[huntDateInput];
             let [sunsetHour, sunsetMin] = sunInfo.sunset.split(':').map(Number);
-            if (sunsetHour < 12) sunsetHour += 12; // PM correction
+            if (sunsetHour < 12) sunsetHour += 12;
             const correctedSunset = `${sunsetHour}:${String(sunsetMin).padStart(2, '0')}`;
 
             const locationInfo = calculateDistanceFromKearney(huntLocation.lat, huntLocation.lng);
@@ -961,6 +964,8 @@
                         const tempCelsius = bestForecast.main.temp;
                         const tempFahrenheit = Math.round(tempCelsius * 9/5 + 32);
                     const direction = degreesToCardinal(deg);
+                        const conditions = bestForecast.weather[0].description;
+                        const precipChance = Math.round((bestForecast.pop || 0) * 100);
                     
                     weatherHtml += `
                         <div class="weather-item">
@@ -972,7 +977,7 @@
                             </div>
                             <div class="weather-details">
                                 <div class="weather-speed">${speedMph} MPH, ${direction} Wind</div>
-                                <div class="weather-temp">${tempFahrenheit}°F</div>
+                                <div class="weather-temp">${tempFahrenheit}°F, ${conditions}</div>
                             </div>
                         </div>`;
                 }
@@ -1065,7 +1070,6 @@
         });
         return `${formattedTime} (${abbreviation})`;
     }
-
 
     function updateDriveTimeStatus(message, type) {
         const statusEl = document.getElementById('driveTimeStatus');
@@ -1164,7 +1168,7 @@
     }
 
     async function getWeatherForecast(lat, lng) {
-        if (WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY_HERE') {
+        if (!WEATHER_API_KEY || WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY_HERE') {
             console.log("Weather forecast skipped: No API key provided.");
             return null;
         }
